@@ -1,0 +1,16 @@
+- name: Setup remote hosts for orchestration
+  hosts: all
+  gather_facts: no
+  become: yes
+
+  tasks:
+
+    - name: Update apt repository cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install packages
+      ansible.builtin.apt:
+        name: acl
+        state: present
