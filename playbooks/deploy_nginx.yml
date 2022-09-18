@@ -1,0 +1,16 @@
+- name: Deploy NGINX to proxy hosts
+  hosts: nginx
+  gather_facts: no
+  become: yes # Sudo as root
+
+  tasks:
+
+    - name: Update apt repository cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install NGINX
+      ansible.builtin.apt:
+        name: nginx
+        state: present
