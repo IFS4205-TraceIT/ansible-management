@@ -51,4 +51,4 @@
         chdir: /home/django/repo
       ansible.builtin.shell: |
         export PATH=/home/django/.local/bin:$PATH
-        poetry run gunicorn --bind 0.0.0.0:8000 tracer_backend.wsgi:application --daemon
+        poetry run gunicorn -w 5 --bind 0.0.0.0:8000 tracer_backend.wsgi:application --daemon
