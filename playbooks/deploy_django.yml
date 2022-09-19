@@ -1,0 +1,54 @@
+- name: Deploy Django + Gunicorn to app servers
+  hosts: "{{ lookup('ansible.builtin.env', 'APP_HOSTS') }}"
+  gather_facts: no
+  become: yes # Sudo as root
+
+  tasks:
+
+    - name: Create django user
+      ansible.builtin.user:
+        name: django
+        shell: /bin/false # Don't allow login
+
+    - name: Add Python Repository
+      ansible.builtin.apt_repository:
+        repo: ppa:deadsnakes/ppa
+
+    - name: Update to Python 3.10
+      ansible.builtin.apt:
+        name: python3.10
+
+    - name: Install poetry
+      become: yes
+      become_user: django
+      ansible.builtin.shell:
+        cmd: curl -sSL https://install.python-poetry.org | python3.10 -
+      args:
+        creates: /home/django/.local/bin/poetry
+
+    - name: Checkout repository
+      become: yes
+      become_user: django
+      ansible.builtin.git:
+        repo: "https://{{ lookup('ansible.builtin.env', 'GITHUB_TOKEN') }}@github.com/{{ lookup('ansible.builtin.env', 'REPOSITORY') }}"
+        dest: /home/django/repo
+
+    - name: Install dependencies
+      become: yes
+      become_user: django
+      args:
+        chdir: /home/django/repo
+      ansible.builtin.shell: |
+        export PATH=/home/django/.local/bin:$PATH
+        poetry config --local virtualenvs.options.no-setuptools true
+        poetry config --local virtualenvs.options.no-pip true
+        poetry install --no-interaction
+    
+    - name: Run gunicorn in daemon mode
+      become: yes
+      become_user: django
+      args:
+        chdir: /home/django/repo
+      ansible.builtin.shell: |
+        export PATH=/home/django/.local/bin:$PATH
+        poetry run gunicorn --bind 0.0.0.0:8000 tracer_backend.wsgi:application --daemon
