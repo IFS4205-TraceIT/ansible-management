@@ -1,5 +1,5 @@
 - name: Deploy PostgreSQL TDE to database hosts
-  hosts: "{{ db_hosts }}"
+  hosts: "{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}"
   gather_facts: no
   become: yes # Sudo as root
 
@@ -12,14 +12,14 @@
 
     - name: Download artifact
       ansible.builtin.get_url:
-        url: "{{ download_url }}"
+        url: "{{ lookup('ansible.builtin.env', 'ARTIFACT_URL') }}"
         dest: /home/postgres/postgresql_tde.tar.gz
         owner: postgres
         group: postgres
-        checksum: "sha256:{{ download_sha256 }}"
+        checksum: "sha256:{{ lookup('ansible.builtin.env', 'ARTIFACT_SHA256') }}"
         mode: 0400
         headers:
-          Authorization: "token {{ git_pat }}"
+          Authorization: "token {{ lookup('ansible.builtin.env', 'GITHUB_TOKEN') }}"
           Accept: "application/octet-stream"
 
     - name: Extract files to home directory
@@ -62,7 +62,7 @@
         creates: /opt/postgresql_db/PG_VERSION # Used to track if cluster is already created
       environment:
         LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib
-        ENCRYPTION_KEY: "{{ encryption_key }}"
+        ENCRYPTION_KEY: "{{ lookup('ansible.builtin.env', 'TDE_KEY') }}"
 
     - name: Create database log
       ansible.builtin.file:
@@ -96,4 +96,4 @@
           - start
       environment:
         LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib
-        ENCRYPTION_KEY: "{{ encryption_key }}"
+        ENCRYPTION_KEY: "{{ lookup('ansible.builtin.env', 'TDE_KEY') }}"
