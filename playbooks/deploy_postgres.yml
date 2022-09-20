@@ -10,7 +10,7 @@
         name: postgres
         shell: /bin/false # Don't allow login
 
-    - name: Download artifact
+    - name: Download PostgreSQL TDE artifact
       ansible.builtin.get_url:
         url: "{{ lookup('ansible.builtin.env', 'ARTIFACT_URL') }}"
         dest: /home/postgres/postgresql_tde.tar.gz
@@ -22,7 +22,7 @@
           Authorization: "token {{ lookup('ansible.builtin.env', 'GITHUB_TOKEN') }}"
           Accept: "application/octet-stream"
 
-    - name: Extract files to home directory
+    - name: Extract PostgreSQL TDE files to home directory
       ansible.builtin.unarchive:
         remote_src: yes
         src: /home/postgres/postgresql_tde.tar.gz
@@ -72,16 +72,7 @@
         group: postgres
         mode: 0600
 
-    - name: Check if database service is already listening
-      wait_for:
-        port: 5432
-        delay: 5
-        timeout: 10
-      register: port_check
-      ignore_errors: yes
-
     - name: Start database service
-      when: port_check.failed
       become: yes
       become_user: postgres
       args:

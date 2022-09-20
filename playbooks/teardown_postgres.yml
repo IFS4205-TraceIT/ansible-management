@@ -1,0 +1,40 @@
+- name: Teardown PostgreSQL TDE from database hosts
+  hosts: "{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}"
+  gather_facts: no
+  become: yes # Sudo as root
+
+  tasks:
+
+    - name: Stop PostgreSQL TDE service
+      become: yes
+      become_user: postgres
+      args:
+        chdir: /home/postgres/postgresql_tde/bin
+      ansible.builtin.command:
+        argv:
+          - ./pg_ctl
+          - -D
+          - /opt/postgresql_db/
+          - stop
+      environment:
+        LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib
+
+    - name: Remove PostgreSQL TDE log
+      ansible.builtin.file:
+        path: /var/log/postgresql_tde.log
+        state: absent
+
+    - name: Remove database cluster
+      ansible.builtin.file:
+        path: /opt/postgresql_db/
+        state: absent
+
+    - name: Remove POC key manager file in home directory
+      ansible.builtin.file:
+        path: /home/postgres/key_manager.sh
+        state: absent
+    
+    - name: Remove PostgreSQL TDE files
+      ansible.builtin.file:
+        path: /home/postgres/postgresql_tde
+        state: absent
