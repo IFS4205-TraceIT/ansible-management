@@ -38,12 +38,13 @@
       become_user: django
       args:
         chdir: /home/django/repo
+        creates: /home/django/.cache/pypoetry/virtualenvs/tracer-backend-*
       ansible.builtin.shell: |
         export PATH=/home/django/.local/bin:$PATH
         poetry config --local virtualenvs.options.no-setuptools true
         poetry config --local virtualenvs.options.no-pip true
         poetry install --no-interaction
-    
+
     - name: Run gunicorn in daemon mode
       become: yes
       become_user: django
@@ -51,4 +52,16 @@
         chdir: /home/django/repo
       ansible.builtin.shell: |
         export PATH=/home/django/.local/bin:$PATH
-        poetry run gunicorn -w 5 --bind 0.0.0.0:8000 tracer_backend.wsgi:application --daemon
+        poetry run gunicorn -w 5 --bind 0.0.0.0:8000 tracer_backend.wsgi:application --daemon --pid tracer_backend.pid
+      environment:
+        # Django
+        DJANGO_SECRET_KEY: "TEST"
+        # Vault
+        VAULT_ADDR: "http://127.0.0.1"
+        VAULT_TOKEN: "TEST"
+        # PostgreSQL
+        POSTGRES_HOST: "TEST"
+        POSTGRES_PORT: "5432"
+        POSTGRES_DB: "TEST"
+        POSTGRES_USER: "TEST"
+        POSTGRES_PASSWORD: "TEST"

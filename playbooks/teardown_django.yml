@@ -1,0 +1,29 @@
+- name: Teardown Django + Gunicorn from app servers
+  hosts: "{{ lookup('ansible.builtin.env', 'APP_HOSTS') }}"
+  gather_facts: no
+  become: yes # Sudo as root
+
+  tasks:
+    - name: Stop gunicorn
+      become: yes
+      become_user: django
+      args:
+        chdir: /home/django/repo
+      ansible.builtin.shell: |
+        kill $(cat tracer_backend.pid)
+    
+    - name: Delete virtual environment
+      become: yes
+      become_user: django
+      args:
+        chdir: /home/django/repo
+      ansible.builtin.shell: |
+        export PATH=/home/django/.local/bin:$PATH
+        poetry env remove python3.10
+
+    - name: Delete repository
+      become: yes
+      become_user: django
+      ansible.builtin.file:
+        path: /home/django/repo
+        state: absent
