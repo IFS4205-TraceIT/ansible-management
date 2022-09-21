@@ -1,0 +1,29 @@
+all:
+  children:
+
+    django:
+      hosts:
+        traceit-01-i:
+
+    postgresql:
+      hosts:
+        traceit-01-i:
+
+    nginx:
+      hosts:
+        traceit-01-i:
+
+    grafana:
+      hosts:
+        traceit-01-i:
+
+    cicd:
+      hosts:
+        traceit-01-i:
+
+    vault:
+      hosts:
+        traceit-01-i:
+  vars:
+    # Username to ssh as
+    ansible_user: sadm
