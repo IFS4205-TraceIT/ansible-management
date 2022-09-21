@@ -1,0 +1,80 @@
+- name: Unseal Vault on secret hosts
+  hosts: vault
+  gather_facts: no
+  become: yes # Sudo as root
+
+  environment:
+    VAULT_SKIP_VERIFY: true
+    VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+
+  tasks:
+
+    - name: Unseal vault
+      ansible.builtin.uri:
+        url: https://127.0.0.1:8200/v1/sys/unseal
+        method: POST
+        body:
+          key: "{{ lookup('ansible.builtin.env', 'UNSEAL_KEY') }}"
+        body_format: json
+        headers:
+          Content-Type: "application/json"
+        validate_certs: no
+
+    - name: Enable TOTP Secrets Engine
+      become: yes
+      become_user: vault
+      ansible.builtin.command:
+        argv:
+          - vault
+          - secrets
+          - enable
+          - totp
+      ignore_errors: yes
+
+    - name: Enable Database Secrets Engine
+      become: yes
+      become_user: vault
+      ansible.builtin.command:
+        argv:
+          - vault
+          - secrets
+          - enable
+          - database
+      ignore_errors: yes
+
+    - name: Configure PostgreSQL secrets engine
+      become: yes
+      become_user: vault
+      ansible.builtin.command:
+        argv:
+          - vault
+          - write
+          - database/config/postgresql
+          - plugin_name=postgresql-database-plugin
+          - connection_url=postgresql://{{ '{{username}}' }}:{{ '{{password}}' }}@192.168.1.201:5432/postgres?sslmode=disable
+          - allowed_roles=*
+          - username={{ lookup('ansible.builtin.env', 'POSTGRES_ROOT_USERNAME') }}
+          - password={{ lookup('ansible.builtin.env', 'POSTGRES_ROOT_PASSWORD') }}
+    
+    - name: Define creation SQL query
+      ansible.builtin.copy:
+        dest: /home/vault/root.sql
+        owner: vault
+        group: vault
+        mode: 0400
+        content: |
+          CREATE ROLE "{{ '{{name}}' }}" WITH LOGIN PASSWORD '{{ '{{password}}' }}' VALID UNTIL '{{ '{{expiration}}' }}' INHERIT;
+          GRANT postgres TO "{{ '{{name}}' }}";
+    
+    - name: Create role
+      become: yes
+      become_user: vault
+      ansible.builtin.command:
+        argv:
+          - vault
+          - write
+          - database/roles/root
+          - db_name=postgresql                       # Defined above "database/config/<db_name>"
+          - creation_statements=@/home/vault/root.sql
+
+    

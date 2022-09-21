@@ -86,7 +86,7 @@
           # "local" is for Unix domain socket connections only
           local   all             postgres                                trust
           # IPv4 local connections:
-          host    all             postgres         0.0.0.0/0              md5
+          host    all             all             0.0.0.0/0               md5
 
     - name: Apply listen_addresses
       become: yes
@@ -122,6 +122,6 @@
         argv:
           - ./psql
           - -c  
-          - ALTER USER postgres PASSWORD '{{ lookup("ansible.builtin.env", "POSTGRES_PASSWORD") }}';
+          - ALTER USER {{ lookup('ansible.builtin.env', 'POSTGRES_ROOT_USERNAME') }} PASSWORD '{{ lookup("ansible.builtin.env", "POSTGRES_ROOT_PASSWORD") }}';
       environment:
         LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib  
