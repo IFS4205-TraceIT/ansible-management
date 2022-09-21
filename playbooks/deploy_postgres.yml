@@ -72,6 +72,30 @@
         group: postgres
         mode: 0600
 
+    - name: Apply pg_hba.conf
+      become: yes
+      become_user: postgres
+      ansible.builtin.copy:
+        dest: /opt/postgresql_db/pg_hba.conf
+        owner: postgres
+        group: postgres
+        mode: 0600
+        content: |
+          # TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+          # "local" is for Unix domain socket connections only
+          local   all             postgres                                trust
+          # IPv4 local connections:
+          host    all             postgres         0.0.0.0/0              md5
+
+    - name: Apply listen_addresses
+      become: yes
+      become_user: postgres
+      ansible.builtin.lineinfile:
+        path: /opt/postgresql_db/postgresql.conf
+        search_string: "#listen_addresses = 'localhost'"
+        line: "listen_addresses = '*'"
+
     - name: Start database service
       become: yes
       become_user: postgres
@@ -88,3 +112,16 @@
       environment:
         LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib
         ENCRYPTION_KEY: "{{ lookup('ansible.builtin.env', 'TDE_KEY') }}"
+
+    - name: Set password for root user
+      become: yes
+      become_user: postgres
+      args:
+        chdir: /home/postgres/postgresql_tde/bin
+      ansible.builtin.command:
+        argv:
+          - ./psql
+          - -c  
+          - ALTER USER postgres PASSWORD '{{ lookup("ansible.builtin.env", "POSTGRES_PASSWORD") }}';
+      environment:
+        LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib  

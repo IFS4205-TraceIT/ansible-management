@@ -1,0 +1,37 @@
+- name: Teardown Vault from secret hosts
+  hosts: vault
+  gather_facts: no
+  become: yes # Sudo as root
+
+  tasks:
+
+    - name: Stop vault service
+      ansible.builtin.systemd:
+        name: vault
+        enabled: yes
+        state: stopped
+
+    - name: Delete vault storage
+      ansible.builtin.file:
+        path: /opt/vault/data
+        state: absent
+
+    - name: Delete vault TLS keys
+      ansible.builtin.file:
+        path: /opt/vault/tls
+        state: absent
+
+    - name: Delete repository
+      ansible.builtin.file:
+        path: /home/vault/repo
+        state: absent
+
+    - name: Delete configuration file
+      ansible.builtin.file:
+        path: /etc/vault.d/vault.hcl
+        state: absent
+    
+    - name: Uninstall vault
+      ansible.builtin.apt:
+        name: vault
+        state: absent

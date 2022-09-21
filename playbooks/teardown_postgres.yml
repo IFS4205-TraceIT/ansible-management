@@ -18,6 +18,7 @@
           - stop
       environment:
         LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib
+      ignore_errors: yes
 
     - name: Remove PostgreSQL TDE log
       ansible.builtin.file:
