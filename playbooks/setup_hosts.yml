@@ -5,12 +5,27 @@
 
   tasks:
 
+    - name: Add SSH authorized key
+      ansible.posix.authorized_key:
+        user: sadm
+        state: present
+        key: "{{ lookup('ansible.builtin.env', 'PUBLIC_KEY') }}"
+    
+    - name: Configure passwordless sudo
+      community.general.sudoers:
+        name: passwordless-sudo
+        state: present
+        user: sadm
+        runas: ALL
+        commands: ALL
+        nopassword: true
+
     - name: Update apt repository cache
       ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 3600
 
-    - name: Install packages
+    - name: Install acl
       ansible.builtin.apt:
         name: acl
         state: present
