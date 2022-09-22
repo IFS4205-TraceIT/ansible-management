@@ -23,7 +23,7 @@ all:
 
     vault:
       hosts:
-        traceit-07-i:
+        192.168.1.207:
   vars:
     # Username to ssh as
     ansible_user: sadm
