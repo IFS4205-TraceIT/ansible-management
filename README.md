@@ -58,26 +58,40 @@ ansible-playbook playbooks/deploy_nginx.yml \
 
 ## Workflow
 
+### Preparing workstation
+
 1) Have an environment with `ansible` installed.
     ```bash
     sudo ./setup_ansible.sh
     ```
 
-2) Setup SSH keypair.
+### Setting up remote hosts for ansible orchestration
+
+1) Setup SSH keypair:
     ```bash
     ssh-keygen -t ed25519
     ```
 
+    Save the public and private keys into this repository's Github Secrets:
+
 2) Setup remote hosts:
     ```bash
-    ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i hosts_prod.yml playbooks/setup_hosts.yml -Kk
+    SSH_PRIVATE_KEY: <Contents of SSH private key>
+    SSH_PUBLIC_KEY: <Contents of SSH public key>
     ```
 
-3) Deploy vault:
+### Setting up `vault`
+
+3) Deploy `vault`:
     ```bash
     GITHUB_TOKEN=... ansible-playbook -i hosts_prod.yml playbooks/deploy_vault.yml
     ```
     Save the unseal key offline and save the initial root token into this repository's Github Secrets:
     ```
     VAULT_TOKEN: <Initial Root Token>
+    ```
+
+4) Unseal `vault`:
+    ```bash
+    UNSEAL_KEY=... ansible-playbook -i hosts_prod.yml playbooks/unseal_vault.yml
     ```
