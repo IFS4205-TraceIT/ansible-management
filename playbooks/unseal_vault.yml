@@ -4,6 +4,7 @@
 
   environment:
     VAULT_SKIP_VERIFY: true
+    VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
 
   tasks:
 
@@ -17,3 +18,36 @@
         headers:
           Content-Type: "application/json"
         validate_certs: no
+
+    - name: Enable TOTP Secrets Engine
+      become: yes
+      become_user: vault
+      ansible.builtin.command:
+        argv:
+          - vault
+          - secrets
+          - enable
+          - totp
+      ignore_errors: yes
+
+    - name: Enable Database Secrets Engine
+      become: yes
+      become_user: vault
+      ansible.builtin.command:
+        argv:
+          - vault
+          - secrets
+          - enable
+          - database
+      ignore_errors: yes
+    
+    - name: KV Secrets Engine
+      become: yes
+      become_user: vault
+      ansible.builtin.command:
+        argv:
+          - vault
+          - secrets
+          - enable
+          - kv
+      ignore_errors: yes

@@ -122,6 +122,6 @@
         argv:
           - ./psql
           - -c  
-          - ALTER USER {{ lookup('ansible.builtin.env', 'POSTGRES_ROOT_USERNAME') }} PASSWORD '{{ lookup("ansible.builtin.env", "POSTGRES_ROOT_PASSWORD") }}';
+          - ALTER USER postgres PASSWORD '{{ lookup("ansible.builtin.env", "POSTGRES_ROOT_PASSWORD") }}';
       environment:
         LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib  

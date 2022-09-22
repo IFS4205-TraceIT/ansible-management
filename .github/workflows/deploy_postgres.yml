@@ -1,0 +1,24 @@
+name: Deploy PostgreSQL TDE 
+on:
+  workflow_dispatch:
+
+jobs:
+
+  runs-on: cd-test
+  container: ubuntu:20.04
+
+  steps:
+    - name: Cleanup build folder
+      run: |
+        ls -la ./
+        rm -rf ./* || true
+        rm -rf ./.??* || true
+        ls -la ./
+    
+    - name: Install ansible and dependencies
+      run: |
+        apt-add-repository -y ppa:ansible/ansible
+        apt-get update
+        apt-get install -y sshpass ansible ansible-lint
+        
+    - 

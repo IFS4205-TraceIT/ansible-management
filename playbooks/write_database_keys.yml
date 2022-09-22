@@ -1,0 +1,22 @@
+- name: Write database secrets to Vault
+  hosts: vault
+  gather_facts: no
+
+  environment:
+    VAULT_SKIP_VERIFY: true
+    VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+
+  tasks:
+
+    - name: Write database secrets
+      become: yes
+      become_user: vault
+      ansible.builtin.command:
+        argv:
+          - vault
+          - kv
+          - put
+          - -mount=kv
+          - "{{ lookup('ansible.builtin.env', 'DATABASE_NAME') }}"
+          - tde_key={{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,ascii_uppercase,digits length=32') }}
+          - root_password={{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,ascii_uppercase,digits length=32') }}
