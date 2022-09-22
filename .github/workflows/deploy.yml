@@ -28,3 +28,19 @@ jobs:
       - name: Check installation
         run: |
           ansible --version
+
+      - name: Clone repo
+        uses: actions/checkout@v3
+
+      - name: Write database keys for Database 1
+        env:
+          DATABASE_NAME: database1
+          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+        uses: dawidd6/action-ansible-playbook@v2
+          directory: ./playbooks
+          playbook: write_database_keys.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_dev.yml
+            --verbose
+
