@@ -19,7 +19,7 @@ all:
 
     cicd:
       hosts:
-        traceit-01-i:
+        traceit-05-i:
 
     vault:
       hosts:

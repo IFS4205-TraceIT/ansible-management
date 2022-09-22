@@ -63,8 +63,8 @@
           - vault
           - operator
           - init
-          - "-key-shares={{ lookup('ansible.builtin.env', 'KEY_SHARES') }}"
-          - "-key-threshold={{ lookup('ansible.builtin.env', 'KEY_THRESHOLD') }}"
+          - "-key-shares={{ lookup('ansible.builtin.env', 'KEY_SHARES', default='1') }}"
+          - "-key-threshold={{ lookup('ansible.builtin.env', 'KEY_THRESHOLD', default='1') }}"
       environment:
         VAULT_SKIP_VERIFY: true
       register: vault_output

@@ -54,3 +54,30 @@ ansible-playbook playbooks/deploy_django.yml \
 ansible-playbook playbooks/deploy_nginx.yml \
     -i hosts_prod.yml 
 ```
+
+
+## Workflow
+
+1) Have an environment with `ansible` installed.
+    ```bash
+    sudo ./setup_ansible.sh
+    ```
+
+2) Setup SSH keypair.
+    ```bash
+    ssh-keygen -t ed25519
+    ```
+
+2) Setup remote hosts:
+    ```bash
+    ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i hosts_prod.yml playbooks/setup_hosts.yml -Kk
+    ```
+
+3) Deploy vault:
+    ```bash
+    GITHUB_TOKEN=... ansible-playbook -i hosts_prod.yml playbooks/deploy_vault.yml
+    ```
+    Save the unseal key offline and save the initial root token into this repository's Github Secrets:
+    ```
+    VAULT_TOKEN: <Initial Root Token>
+    ```
