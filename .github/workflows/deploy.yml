@@ -1,10 +1,10 @@
-name: Deploy PostgreSQL TDE 
+name: Deploy
 on:
   workflow_dispatch:
 
 jobs:
   
-  deploy-postgresql-tde:
+  deploy:
 
     runs-on: cd-test
     container: ubuntu:20.04
@@ -19,6 +19,7 @@ jobs:
       
       - name: Install ansible and dependencies
         run: |
+          apt-get install -y software-properties-common
           apt-add-repository -y ppa:ansible/ansible
           apt-get update
           apt-get install -y sshpass ansible ansible-lint
