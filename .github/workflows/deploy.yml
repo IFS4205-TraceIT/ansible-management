@@ -114,10 +114,8 @@ jobs:
           VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
           POSTGRES_HOST: traceit-01-i
           POSTGRES_DB: postgres
-          # POSTGRES_USER: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_USER }}"
-          # POSTGRES_PASSWORD: "${{ steps.database1-secrets.outputs.POSTGRES_PASSWORD }}"
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: "${{ steps.database1-secrets.outputs.POSTGRES_ROOT_PASSWORD }}"
+          POSTGRES_USER: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_USER }}"
+          POSTGRES_PASSWORD: "${{ steps.database1-secrets.outputs.POSTGRES_PASSWORD }}"
         with:
           playbook: playbooks/deploy_django.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
