@@ -130,7 +130,7 @@
         argv:
           - vault
           - write
-          - database/config/postgresql
+          - database/config/{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}
           - plugin_name=postgresql-database-plugin
           - connection_url=postgresql://{{ '{{username}}' }}:{{ '{{password}}' }}@{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}:5432/postgres?sslmode=disable
           - allowed_roles=*
@@ -157,5 +157,5 @@
           - vault
           - write
           - database/roles/root
-          - db_name=postgresql                       # Defined above "database/config/<db_name>"
+          - db_name={{ lookup('ansible.builtin.env', 'DB_HOSTS') }}
           - creation_statements=@/home/vault/root.sql

@@ -8,7 +8,7 @@ jobs:
 
     runs-on: cd-test
     container: 
-      image: ubuntu:20.04
+      image: willhallonline/ansible:2.12-ubuntu-20.04
       options: --dns 192.168.1.101
 
     steps:
@@ -18,14 +18,6 @@ jobs:
           rm -rf ./* || true
           rm -rf ./.??* || true
           ls -la ./
-      
-      - name: Install ansible and dependencies
-        run: |
-          apt-get update
-          apt-get install -y software-properties-common
-          apt-add-repository -y ppa:ansible/ansible
-          apt-get update
-          apt-get install -y sshpass ansible ansible-lint
 
       - name: Check installation
         run: |
