@@ -72,6 +72,7 @@ jobs:
           DB_HOSTS: traceit-01-i
           TDE_KEY:                "${{ steps.database1-secrets.outputs.TDE_KEY }}"
           POSTGRES_ROOT_PASSWORD: "${{ steps.database1-secrets.outputs.POSTGRES_ROOT_PASSWORD }}"
+          VAULT_TOKEN:            "${{ secrets.VAULT_TOKEN }}"
         with:
           playbook: playbooks/deploy_postgres.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
