@@ -34,11 +34,10 @@ jobs:
       - name: Clone repo
         uses: actions/checkout@v3
 
-      - name: Write database keys for Database 1
+      - name: Generate database keys for Database 1
         env:
           DATABASE_NAME: database1
           VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
-          
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: playbooks/write_database_keys.yml
@@ -46,3 +45,34 @@ jobs:
           options: |
             --inventory hosts_dev.yml
 
+      - name: Download PostgreSQL TDE release
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: IFS4205-TraceIT/PostgreSQL-TDE
+          version: tags/vlatest
+          file: postgresql_tde.tar.gz 
+          token: ${{ secrets.PAT }}
+
+      - name: Get Database 1 encryption key from Vault
+        uses: hashicorp/vault-action@v2.4.0
+        id: database1-tde
+        with:
+          url: https://traceit-07-i:8200
+          token: ${{ secrets.VAULT_TOKEN }}
+          tlsSkipVerify: true
+          secrets: |
+              kv/database1 tde_key | TDE_KEY ;
+              kv/database1 root_password | POSTGRES_ROOT_PASSWORD;
+          exportEnv: false
+
+      - name: Deploy Database 1
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          DB_HOSTS: traceit-01-i
+          TDE_KEY:                "${{ steps.database1-tde.outputs.TDE_KEY }}"
+          POSTGRES_ROOT_PASSWORD: "${{ steps.database1-tde.outputs.POSTGRES_ROOT_PASSWORD }}"
+        with:
+          playbook: playbooks/deploy_postgres.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_dev.yml

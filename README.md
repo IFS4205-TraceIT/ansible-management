@@ -74,24 +74,28 @@ ansible-playbook playbooks/deploy_nginx.yml \
 
     Save the public and private keys into this repository's Github Secrets:
 
-2) Setup remote hosts:
     ```bash
     SSH_PRIVATE_KEY: <Contents of SSH private key>
     SSH_PUBLIC_KEY: <Contents of SSH public key>
     ```
 
+2) Setup remote hosts:
+    ```bash
+    ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i hosts_prod.yml playbooks/setup_hosts.yml -Kk
+    ```
+
 ### Setting up `vault`
 
-3) Deploy `vault`:
+1) Deploy `vault`:
     ```bash
     GITHUB_TOKEN=... ansible-playbook -i hosts_prod.yml playbooks/deploy_vault.yml
     ```
-    Save the unseal key offline and save the initial root token into this repository's Github Secrets:
+    **Save the unseal key offline** and save the initial root token into this repository's Github Secrets:
     ```
     VAULT_TOKEN: <Initial Root Token>
     ```
 
-4) Unseal `vault`:
+2) Unseal `vault`:
     ```bash
     UNSEAL_KEY=... ansible-playbook -i hosts_prod.yml playbooks/unseal_vault.yml
     ```
