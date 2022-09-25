@@ -10,7 +10,7 @@
       args:
         chdir: /home/django/repo
       ansible.builtin.shell: |
-        kill $(cat tracer_backend.pid)
+        kill $(cat *.pid)
       ignore_errors: yes
     
     - name: Delete virtual environment
