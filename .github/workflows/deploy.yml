@@ -116,7 +116,7 @@ jobs:
           DJANGO_SECRET_KEY: "${{ steps.tracer_backend-secrets.outputs.DJANGO_SECRET_KEY }}"
           VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
           POSTGRES_HOST: traceit-01-i
-          POSTGRES_DB: postgre
+          POSTGRES_DB: postgres
           POSTGRES_USER: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_USER }}"
           POSTGRES_PASSWORD: "${{ steps.database1-secrets.outputs.POSTGRES_PASSWORD }}"
         with:
