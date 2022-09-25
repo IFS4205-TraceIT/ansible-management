@@ -78,3 +78,22 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
             --inventory hosts_dev.yml
+
+      - name: Deploy tracer-backend
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          APP_HOSTS: traceit-01-i
+          PAT: ${{ secrets.PAT }}
+          REPOSITORY: "IFS4205-TraceIT/tracer-backend"
+          NAME: tracer_backend
+          DJANGO_SECRET_KEY: AAAA
+          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+          POSTGRES_HOST: traceit-01-i
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: "${{ steps.database1-secrets.outputs.POSTGRES_ROOT_PASSWORD }}"
+        with:
+          playbook: playbooks/deploy_postgres.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_dev.yml

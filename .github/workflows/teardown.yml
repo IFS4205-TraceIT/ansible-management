@@ -34,6 +34,16 @@ jobs:
       - name: Clone repo
         uses: actions/checkout@v3
 
+      - name: Teardown tracer-backend
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          APP_HOSTS: traceit-01-i
+        with:
+          playbook: playbooks/teardown_django.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_dev.yml
+
       - name: Teardown Database 1
         uses: dawidd6/action-ansible-playbook@v2
         env:
