@@ -66,3 +66,7 @@
         POSTGRES_DB: "{{ lookup('ansible.builtin.env', 'POSTGRES_DB') }}"
         POSTGRES_USER: "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
         POSTGRES_PASSWORD: "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
+      register: hello
+    - debug: msg="{{ hello.stdout }}"
+
+    - debug: msg="{{ hello.stderr }}"
