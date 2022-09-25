@@ -1,0 +1,21 @@
+- name: Write django secrets to Vault
+  hosts: vault
+  gather_facts: no
+
+  environment:
+    VAULT_SKIP_VERIFY: true
+    VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+
+  tasks:
+
+    - name: Write Django secrets
+      become: yes
+      become_user: vault
+      ansible.builtin.command:
+        argv:
+          - vault
+          - kv
+          - put
+          - -mount=kv
+          - "{{ lookup('ansible.builtin.env', 'APP_NAME') }}"
+          - secret_key={{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,ascii_uppercase,digits length=50') }}
