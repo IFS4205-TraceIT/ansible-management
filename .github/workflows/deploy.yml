@@ -53,7 +53,7 @@ jobs:
           token: ${{ secrets.VAULT_TOKEN }}
           tlsSkipVerify: true
           secrets: |
-              kv/database1 tde_key | TDE_KEY ;
+              kv/database1 tde_key | TDE_KEY;
               kv/database1 root_password | POSTGRES_ROOT_PASSWORD;
           exportEnv: false
 

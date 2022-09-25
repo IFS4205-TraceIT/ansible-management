@@ -18,5 +18,5 @@
           - put
           - -mount=kv
           - "{{ lookup('ansible.builtin.env', 'DATABASE_NAME') }}"
-          - tde_key={{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,digits length=32') }}
-          - root_password={{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,digits length=32') }}
+          - tde_key={{ lookup('ansible.builtin.password', '/dev/null chars=hexdigits length=32') }}
+          - root_password={{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,ascii_uppercase,digits length=32') }}
