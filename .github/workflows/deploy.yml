@@ -143,7 +143,7 @@ jobs:
         env:
           APP_HOSTS: traceit-02-i
           PAT: ${{ secrets.PAT }}
-          REPOSITORY: "IFS4205-TraceIT/research_backend"
+          REPOSITORY: "IFS4205-TraceIT/research-backend"
           APP_NAME: research_backend
           DJANGO_SECRET_KEY: "${{ steps.research_backend-secrets.outputs.DJANGO_SECRET_KEY }}"
           VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
