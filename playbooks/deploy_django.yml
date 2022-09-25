@@ -44,6 +44,23 @@
         poetry config --local virtualenvs.options.no-pip true
         poetry install --no-interaction
 
+    - name: Migrate database
+      become: yes
+      become_user: django
+      args:
+        chdir: /home/django/repo
+      ansible.builtin.shell: |
+        export PATH=/home/django/.local/bin:$PATH
+        poetry run python manage.py makemigrations
+        poetry run python manage.py migrate
+      environment:
+        # PostgreSQL
+        POSTGRES_HOST: "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
+        POSTGRES_PORT: 5432
+        POSTGRES_DB: "{{ lookup('ansible.builtin.env', 'POSTGRES_DB') }}"
+        POSTGRES_USER: "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
+        POSTGRES_PASSWORD: "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
+
     - name: Run gunicorn in daemon mode
       become: yes
       become_user: django
