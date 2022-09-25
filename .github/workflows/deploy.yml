@@ -68,7 +68,7 @@ jobs:
 
       - name: Check if keys fetched
         run: |
-          echo "${{ steps.database1-tde.outputs.TDE_KEY }}"
+          echo "${{ steps.database1-tde.outputs.TDE_KEY }}" | base64
 
       # - name: Deploy Database 1
       #   uses: dawidd6/action-ansible-playbook@v2
