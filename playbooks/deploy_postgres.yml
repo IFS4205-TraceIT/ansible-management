@@ -112,3 +112,48 @@
           - ALTER USER postgres PASSWORD '{{ lookup("ansible.builtin.env", "POSTGRES_ROOT_PASSWORD") }}';
       environment:
         LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib  
+
+- name: Configure dynamic secrets for PostgreSQL
+  hosts: vault
+  gather_facts: no
+
+  environment:
+    VAULT_SKIP_VERIFY: true
+    VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+
+  tasks:
+
+    - name: Configure PostgreSQL secrets engine
+      become: yes
+      become_user: vault
+      ansible.builtin.command:
+        argv:
+          - vault
+          - write
+          - database/config/postgresql
+          - plugin_name=postgresql-database-plugin
+          - connection_url=postgresql://{{ '{{username}}' }}:{{ '{{password}}' }}@{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}:5432/postgres?sslmode=disable
+          - allowed_roles=*
+          - username=postgres
+          - password={{ lookup('ansible.builtin.env', 'POSTGRES_ROOT_PASSWORD') }}
+
+    - name: Define creation SQL query
+      ansible.builtin.copy:
+        dest: /home/vault/root.sql
+        owner: vault
+        group: vault
+        mode: 0400
+        content: |
+          CREATE ROLE "{{ '{{name}}' }}" WITH LOGIN PASSWORD '{{ '{{password}}' }}' VALID UNTIL '{{ '{{expiration}}' }}' INHERIT;
+          GRANT postgres TO "{{ '{{name}}' }}";
+    
+    - name: Create role
+      become: yes
+      become_user: vault
+      ansible.builtin.command:
+        argv:
+          - vault
+          - write
+          - database/roles/root
+          - db_name=postgresql                       # Defined above "database/config/<db_name>"
+          - creation_statements=@/home/vault/root.sql
