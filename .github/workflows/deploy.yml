@@ -47,7 +47,7 @@ jobs:
 
       - name: Get Database 1 secrets from Vault
         uses: hashicorp/vault-action@v2.4.0
-        id: database1-tde
+        id: database1-secrets
         with:
           url: https://traceit-07-i:8200
           token: ${{ secrets.VAULT_TOKEN }}
@@ -66,18 +66,14 @@ jobs:
           token: ${{ secrets.PAT }}
           target: playbooks/files/postgresql_tde.tar.gz
 
-      - name: Check if keys fetched
-        run: |
-          echo "${{ steps.database1-tde.outputs.TDE_KEY }}" | base64
-
-      # - name: Deploy Database 1
-      #   uses: dawidd6/action-ansible-playbook@v2
-      #   env:
-      #     DB_HOSTS: traceit-01-i
-      #     TDE_KEY:                "${{ steps.database1-tde.outputs.TDE_KEY }}"
-      #     POSTGRES_ROOT_PASSWORD: "${{ steps.database1-tde.outputs.POSTGRES_ROOT_PASSWORD }}"
-      #   with:
-      #     playbook: playbooks/deploy_postgres.yml
-      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     options: |
-      #       --inventory hosts_dev.yml
+      - name: Deploy Database 1
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          DB_HOSTS: traceit-01-i
+          TDE_KEY:                "${{ steps.database1-secrets.outputs.TDE_KEY }}"
+          POSTGRES_ROOT_PASSWORD: "${{ steps.database1-secrets.outputs.POSTGRES_ROOT_PASSWORD }}"
+        with:
+          playbook: playbooks/deploy_postgres.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_dev.yml
