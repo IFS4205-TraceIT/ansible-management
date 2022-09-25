@@ -4,7 +4,7 @@ on:
 
 jobs:
   
-  deploy:
+  teardown:
 
     runs-on: cd-test
     container: 
@@ -39,7 +39,7 @@ jobs:
         env:
           DB_HOSTS: traceit-01-i
         with:
-          playbook: playbooks/deploy_postgres.yml
+          playbook: playbooks/teardown_postgres.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
             --inventory hosts_dev.yml
