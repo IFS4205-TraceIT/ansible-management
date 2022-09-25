@@ -5,11 +5,13 @@ all:
       hosts:
         traceit-01-i:
         traceit-02-i:
+        traceit-03-i:
 
     postgresql:
       hosts:
         traceit-01-i:
         traceit-02-i:
+        traceit-03-i:
 
     nginx:
       hosts:
