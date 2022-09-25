@@ -100,7 +100,7 @@ jobs:
           secrets: |
               kv/tracer_backend secret_key | DJANGO_SECRET_KEY;
               database/creds/root username | POSTGRES_USER;
-              database/creds/root password | POSTGRES_PASSWORD;
+              database/creds/root password | POSTGRES_PASSWORD
           exportEnv: false
 
       - name: Deploy tracer_backend
