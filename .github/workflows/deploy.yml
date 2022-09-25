@@ -103,9 +103,6 @@ jobs:
               database/creds/root password | POSTGRES_PASSWORD;
           exportEnv: false
 
-      - name: Print contents
-        run: echo "${{ steps.tracer_backend-secrets.outputs.POSTGRES_USER }}:${{ steps.database1-secrets.outputs.POSTGRES_PASSWORD }}" | base64
-
       - name: Deploy tracer_backend
         uses: dawidd6/action-ansible-playbook@v2
         env:
@@ -118,7 +115,7 @@ jobs:
           POSTGRES_HOST: traceit-01-i
           POSTGRES_DB: postgres
           POSTGRES_USER: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_USER }}"
-          POSTGRES_PASSWORD: "${{ steps.database1-secrets.outputs.POSTGRES_PASSWORD }}"
+          POSTGRES_PASSWORD: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_PASSWORD }}"
         with:
           playbook: playbooks/deploy_django.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
