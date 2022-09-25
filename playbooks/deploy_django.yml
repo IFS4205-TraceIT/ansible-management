@@ -30,7 +30,7 @@
       become: yes
       become_user: django
       ansible.builtin.git:
-        repo: "https://{{ lookup('ansible.builtin.env', 'GITHUB_TOKEN') }}@github.com/{{ lookup('ansible.builtin.env', 'REPOSITORY') }}"
+        repo: "https://{{ lookup('ansible.builtin.env', 'PAT') }}@github.com/{{ lookup('ansible.builtin.env', 'REPOSITORY') }}"
         dest: /home/django/repo
 
     - name: Install dependencies
@@ -38,7 +38,6 @@
       become_user: django
       args:
         chdir: /home/django/repo
-        creates: /home/django/.cache/pypoetry/virtualenvs/tracer-backend-*
       ansible.builtin.shell: |
         export PATH=/home/django/.local/bin:$PATH
         poetry config --local virtualenvs.options.no-setuptools true
@@ -52,16 +51,16 @@
         chdir: /home/django/repo
       ansible.builtin.shell: |
         export PATH=/home/django/.local/bin:$PATH
-        poetry run gunicorn -w 5 --bind 0.0.0.0:8000 tracer_backend.wsgi:application --daemon --pid tracer_backend.pid
+        poetry run gunicorn -w 5 --bind 0.0.0.0:8000 {{ lookup('ansible.builtin.env', 'NAME') }}.wsgi:application --daemon --pid tracer_backend.pid
       environment:
         # Django
-        DJANGO_SECRET_KEY: "TEST"
+        DJANGO_SECRET_KEY: "{{ lookup('ansible.builtin.env', 'DJANGO_SECRET_KEY') }}"
         # Vault
-        VAULT_ADDR: "http://127.0.0.1"
-        VAULT_TOKEN: "TEST"
+        VAULT_ADDR: "http://traceit-07-i"
+        VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
         # PostgreSQL
-        POSTGRES_HOST: "TEST"
-        POSTGRES_PORT: "5432"
-        POSTGRES_DB: "TEST"
-        POSTGRES_USER: "TEST"
-        POSTGRES_PASSWORD: "TEST"
+        POSTGRES_HOST: "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
+        POSTGRES_PORT: 5432
+        POSTGRES_DB: "{{ lookup('ansible.builtin.env', 'POSTGRES_DB') }}"
+        POSTGRES_USER: "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
+        POSTGRES_PASSWORD: "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"

@@ -93,7 +93,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: "${{ steps.database1-secrets.outputs.POSTGRES_ROOT_PASSWORD }}"
         with:
-          playbook: playbooks/deploy_postgres.yml
+          playbook: playbooks/deploy_django.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
             --inventory hosts_dev.yml
