@@ -4,18 +4,20 @@ all:
     django:
       hosts:
         traceit-01-i:
+        traceit-02-i:
 
     postgresql:
       hosts:
         traceit-01-i:
+        traceit-02-i:
 
     nginx:
       hosts:
-        traceit-01-i:
+        traceit-04-i:
 
     grafana:
       hosts:
-        traceit-01-i:
+        traceit-06-i:
 
     cicd:
       hosts:
