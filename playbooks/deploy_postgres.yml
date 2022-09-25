@@ -142,7 +142,7 @@
         dest: /home/vault/root.sql
         owner: vault
         group: vault
-        mode: 0400
+        mode: 0700
         content: |
           CREATE ROLE "{{ '{{name}}' }}" WITH LOGIN PASSWORD '{{ '{{password}}' }}' VALID UNTIL '{{ '{{expiration}}' }}' INHERIT;
           GRANT postgres TO "{{ '{{name}}' }}";
