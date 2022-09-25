@@ -11,6 +11,7 @@
         chdir: /home/django/repo
       ansible.builtin.shell: |
         kill $(cat tracer_backend.pid)
+      ignore_errors: yes
     
     - name: Delete virtual environment
       become: yes
