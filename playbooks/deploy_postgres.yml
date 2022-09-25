@@ -138,6 +138,8 @@
           - password={{ lookup('ansible.builtin.env', 'POSTGRES_ROOT_PASSWORD') }}
 
     - name: Define creation SQL query
+      become: yes
+      become_user: vault
       ansible.builtin.copy:
         dest: /home/vault/root.sql
         owner: vault
