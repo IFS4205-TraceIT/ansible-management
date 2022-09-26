@@ -149,8 +149,12 @@ jobs:
           VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
           POSTGRES_HOST: traceit-01-i.comp.nus.edu.sg
           POSTGRES_DB: postgres
-          POSTGRES_USER: "${{ steps.research_backend-secrets.outputs.POSTGRES_USER }}"
-          POSTGRES_PASSWORD: "${{ steps.research_backend-secrets.outputs.POSTGRES_PASSWORD }}"
+          # POSTGRES_USER: "${{ steps.research_backend-secrets.outputs.POSTGRES_USER }}"
+          # POSTGRES_PASSWORD: "${{ steps.research_backend-secrets.outputs.POSTGRES_PASSWORD }}"
+          
+          # Temporarily share credentials with tracer_backend
+          POSTGRES_USER: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_USER }}"
+          POSTGRES_PASSWORD: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_PASSWORD }}"
         with:
           playbook: playbooks/deploy_django.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
