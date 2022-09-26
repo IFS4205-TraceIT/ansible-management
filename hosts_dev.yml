@@ -3,31 +3,32 @@ all:
 
     django:
       hosts:
-        traceit-01-i:
-        traceit-02-i:
-        traceit-03-i:
+        traceit-01-i.comp.nus.edu.sg:
+        traceit-02-i.comp.nus.edu.sg:
+        traceit-03-i.comp.nus.edu.sg:
 
     postgresql:
       hosts:
-        traceit-01-i:
-        traceit-02-i:
-        traceit-03-i:
+        traceit-01-i.comp.nus.edu.sg:
+        traceit-02-i.comp.nus.edu.sg:
+        traceit-03-i.comp.nus.edu.sg:
 
     nginx:
       hosts:
-        traceit-04-i:
+        traceit-04-i.comp.nus.edu.sg:
 
     grafana:
       hosts:
-        traceit-06-i:
+        traceit-06-i.comp.nus.edu.sg:
 
     cicd:
       hosts:
-        traceit-05-i:
+        traceit-05-i.comp.nus.edu.sg:
 
     vault:
       hosts:
-        traceit-07-i:
+        traceit-07-i.comp.nus.edu.sg:
+
   vars:
     # Username to ssh as
     ansible_user: sadm

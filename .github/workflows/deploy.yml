@@ -41,7 +41,7 @@ jobs:
         uses: hashicorp/vault-action@v2.4.0
         id: database1-secrets
         with:
-          url: https://traceit-07-i:8200
+          url: https://traceit-07-i.comp.nus.edu.sg:8200
           token: ${{ secrets.VAULT_TOKEN }}
           tlsSkipVerify: true
           secrets: |
@@ -61,7 +61,7 @@ jobs:
       - name: Deploy Database 1
         uses: dawidd6/action-ansible-playbook@v2
         env:
-          DB_HOSTS: traceit-01-i
+          DB_HOSTS: traceit-01-i.comp.nus.edu.sg
           TDE_KEY:                "${{ steps.database1-secrets.outputs.TDE_KEY }}"
           POSTGRES_ROOT_PASSWORD: "${{ steps.database1-secrets.outputs.POSTGRES_ROOT_PASSWORD }}"
           VAULT_TOKEN:            "${{ secrets.VAULT_TOKEN }}"
@@ -97,7 +97,7 @@ jobs:
         uses: hashicorp/vault-action@v2.4.0
         id: tracer_backend-secrets
         with:
-          url: https://traceit-07-i:8200
+          url: https://traceit-07-i.comp.nus.edu.sg:8200
           token: ${{ secrets.VAULT_TOKEN }}
           tlsSkipVerify: true
           secrets: |
@@ -110,7 +110,7 @@ jobs:
         uses: hashicorp/vault-action@v2.4.0
         id: research_backend-secrets
         with:
-          url: https://traceit-07-i:8200
+          url: https://traceit-07-i.comp.nus.edu.sg:8200
           token: ${{ secrets.VAULT_TOKEN }}
           tlsSkipVerify: true
           secrets: |
@@ -122,13 +122,13 @@ jobs:
       - name: Deploy tracer_backend
         uses: dawidd6/action-ansible-playbook@v2
         env:
-          APP_HOSTS: traceit-01-i
+          APP_HOSTS: traceit-01-i.comp.nus.edu.sg
           PAT: ${{ secrets.PAT }}
           REPOSITORY: "IFS4205-TraceIT/tracer-backend"
           APP_NAME: tracer_backend
           DJANGO_SECRET_KEY: "${{ steps.tracer_backend-secrets.outputs.DJANGO_SECRET_KEY }}"
           VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
-          POSTGRES_HOST: traceit-01-i
+          POSTGRES_HOST: traceit-01-i.comp.nus.edu.sg
           POSTGRES_DB: postgres
           POSTGRES_USER: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_USER }}"
           POSTGRES_PASSWORD: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_PASSWORD }}"
@@ -141,13 +141,13 @@ jobs:
       - name: Deploy research_backend
         uses: dawidd6/action-ansible-playbook@v2
         env:
-          APP_HOSTS: traceit-02-i
+          APP_HOSTS: traceit-02-i.comp.nus.edu.sg
           PAT: ${{ secrets.PAT }}
           REPOSITORY: "IFS4205-TraceIT/research-backend"
           APP_NAME: research_backend
           DJANGO_SECRET_KEY: "${{ steps.research_backend-secrets.outputs.DJANGO_SECRET_KEY }}"
           VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
-          POSTGRES_HOST: traceit-01-i
+          POSTGRES_HOST: traceit-01-i.comp.nus.edu.sg
           POSTGRES_DB: postgres
           POSTGRES_USER: "${{ steps.research_backend-secrets.outputs.POSTGRES_USER }}"
           POSTGRES_PASSWORD: "${{ steps.research_backend-secrets.outputs.POSTGRES_PASSWORD }}"

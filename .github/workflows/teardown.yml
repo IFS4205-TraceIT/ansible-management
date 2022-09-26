@@ -29,7 +29,7 @@ jobs:
       - name: Teardown tracer_backend
         uses: dawidd6/action-ansible-playbook@v2
         env:
-          APP_HOSTS: traceit-01-i
+          APP_HOSTS: traceit-01-i.comp.nus.edu.sg
         with:
           playbook: playbooks/teardown_django.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -39,7 +39,7 @@ jobs:
       - name: Teardown research_backend
         uses: dawidd6/action-ansible-playbook@v2
         env:
-          APP_HOSTS: traceit-02-i
+          APP_HOSTS: traceit-02-i.comp.nus.edu.sg
         with:
           playbook: playbooks/teardown_django.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -49,7 +49,7 @@ jobs:
       - name: Teardown Database 1
         uses: dawidd6/action-ansible-playbook@v2
         env:
-          DB_HOSTS: traceit-01-i
+          DB_HOSTS: traceit-01-i.comp.nus.edu.sg
         with:
           playbook: playbooks/teardown_postgres.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
