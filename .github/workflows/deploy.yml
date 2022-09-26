@@ -156,3 +156,29 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
             --inventory hosts_dev.yml
+
+      - name: Download tracer_frontend release
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: IFS4205-TraceIT/tracer-frontend
+          version: tags/vlatest
+          file: tracer-frontend.tar.gz 
+          token: ${{ secrets.PAT }}
+          target: playbooks/files/tracer-frontend.tar.gz
+
+      - name: Download research_frontend release
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: IFS4205-TraceIT/research-frontend
+          version: tags/vlatest
+          file: research-frontend.tar.gz 
+          token: ${{ secrets.PAT }}
+          target: playbooks/files/research-frontend.tar.gz
+      
+      - name: Deploy NGINX
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/deploy_nginx.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_dev.yml

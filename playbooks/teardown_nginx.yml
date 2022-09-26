@@ -1,0 +1,21 @@
+- name: Teardown NGINX from proxy hosts
+  hosts: nginx
+  gather_facts: no
+  become: yes # Sudo as root
+
+  tasks:
+
+    - name: Remove /tracer web directory
+      ansible.builtin.file:
+        state: absent
+        path: /var/www/tracer
+
+    - name: Remove /research web directory
+      ansible.builtin.file:
+        state: absent
+        path: /var/www/research
+
+    - name: Stop NGINX
+      ansible.builtin.systemd:
+        name: nginx.service
+        state: stopped

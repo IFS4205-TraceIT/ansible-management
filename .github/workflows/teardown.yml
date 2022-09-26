@@ -55,3 +55,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
             --inventory hosts_dev.yml
+
+      - name: Teardown proxy
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/teardown_nginx.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_dev.yml
