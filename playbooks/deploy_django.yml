@@ -52,7 +52,7 @@
         group: django
         mode: 0600
     
-    - name: Create gunicorn access log
+    - name: Create gunicorn error log
       ansible.builtin.file:
         path: /var/log/gunicorn_error.log
         state: touch

@@ -28,3 +28,13 @@
       ansible.builtin.file:
         path: /home/django/repo
         state: absent
+
+    - name: Remove gunicorn access log
+      ansible.builtin.file:
+        path: /var/log/gunicorn_access.log
+        state: absent
+    
+    - name: Remove gunicorn error log
+      ansible.builtin.file:
+        path: /var/log/gunicorn_error.log
+        state: absent
