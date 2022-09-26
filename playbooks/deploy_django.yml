@@ -73,6 +73,7 @@
       environment:
         # Django
         DJANGO_SECRET_KEY: "{{ lookup('ansible.builtin.env', 'DJANGO_SECRET_KEY') }}"
+        DJANGO_DEBUG: True
         # Vault
         VAULT_ADDR: "http://traceit-07-i.comp.nus.edu.sg"
         VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
