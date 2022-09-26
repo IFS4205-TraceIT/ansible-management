@@ -44,6 +44,22 @@
         poetry config --local virtualenvs.options.no-pip true
         poetry install --no-interaction
 
+    - name: Create gunicorn access log
+      ansible.builtin.file:
+        path: /var/log/gunicorn_access.log
+        state: touch
+        owner: django
+        group: django
+        mode: 0600
+    
+    - name: Create gunicorn access log
+      ansible.builtin.file:
+        path: /var/log/gunicorn_error.log
+        state: touch
+        owner: django
+        group: django
+        mode: 0600
+
     - name: Run gunicorn in daemon mode
       become: yes
       become_user: django
@@ -53,7 +69,7 @@
         export PATH=/home/django/.local/bin:$PATH
         poetry run python manage.py makemigrations
         poetry run python manage.py migrate
-        poetry run gunicorn -w 5 --bind 0.0.0.0:8000 {{ lookup('ansible.builtin.env', 'APP_NAME') }}.wsgi:application --daemon --pid {{ lookup('ansible.builtin.env', 'APP_NAME') }}.pid
+        poetry run gunicorn -w 5 --bind 0.0.0.0:8000 {{ lookup('ansible.builtin.env', 'APP_NAME') }}.wsgi:application --daemon --pid {{ lookup('ansible.builtin.env', 'APP_NAME') }}.pid --access-logfile /var/log/gunicorn_access.log --error-logfile /var/log/gunicorn_error.log
       environment:
         # Django
         DJANGO_SECRET_KEY: "{{ lookup('ansible.builtin.env', 'DJANGO_SECRET_KEY') }}"

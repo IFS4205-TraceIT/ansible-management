@@ -45,10 +45,18 @@
             listen       80;
 
             location /tracer/api {
+              rewrite ^/tracer/api(.*) $1 break;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
               proxy_pass      http://traceit-01-i.comp.nus.edu.sg:8000;
             }
 
             location /research/api {
+              rewrite ^/research/api(.*) $1 break;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
               proxy_pass      http://traceit-02-i.comp.nus.edu.sg:8000;
             }
 
