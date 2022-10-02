@@ -51,3 +51,14 @@
           - enable
           - kv
       ignore_errors: yes
+
+    - name: KV V2 Secrets Engine
+      become: yes
+      become_user: vault
+      ansible.builtin.command:
+        argv:
+          - vault
+          - secrets
+          - enable
+          - kv-v2
+      ignore_errors: yes
