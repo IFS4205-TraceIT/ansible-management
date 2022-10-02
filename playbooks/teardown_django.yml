@@ -21,6 +21,7 @@
       ansible.builtin.shell: |
         export PATH=/home/django/.local/bin:$PATH
         poetry env remove python3.10
+      ignore_errors: yes
 
     - name: Delete repository
       become: yes
