@@ -1,0 +1,44 @@
+name: Unseal Vault
+on:
+  workflow_dispatch:
+    inputs:
+      unseal_key:
+        type: string
+        description: Key used to unseal the vault
+        required: true
+
+jobs:
+  
+  unseal:
+
+    runs-on: cd-test
+    container: 
+      image: willhallonline/ansible:2.12-ubuntu-20.04
+      options: --dns 192.168.1.101
+
+    steps:
+      - name: Cleanup build folder
+        run: |
+          ls -la ./
+          rm -rf ./* || true
+          rm -rf ./.??* || true
+          ls -la ./
+
+      - name: Check installation
+        run: |
+          ansible --version
+
+      - name: Clone repo
+        uses: actions/checkout@v3
+
+      - name: Unseal Vault
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+          UNSEAL_KEY: ${{ inputs.unseal_key }}
+        with:
+          playbook: playbooks/unseal_vault.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_dev.yml
+      
