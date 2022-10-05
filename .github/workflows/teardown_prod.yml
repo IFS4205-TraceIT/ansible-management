@@ -1,0 +1,75 @@
+name: Teardown (from Prod environment)
+on:
+  workflow_dispatch:
+
+jobs:
+  
+  teardown:
+
+    runs-on: cd
+    container: 
+      image: willhallonline/ansible:2.12-ubuntu-20.04
+      options: --dns 137.132.90.2 --dns 137.132.85.2 --dns 8.8.8.8
+
+    steps:
+      - name: Cleanup build folder
+        run: |
+          ls -la ./
+          rm -rf ./* || true
+          rm -rf ./.??* || true
+          ls -la ./
+
+      - name: Check installation
+        run: |
+          ansible --version
+
+      - name: Clone repo
+        uses: actions/checkout@v3
+
+      - name: Teardown tracer_backend
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          APP_HOSTS: traceit-01-i.comp.nus.edu.sg
+        with:
+          playbook: playbooks/teardown_django.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+      
+      - name: Teardown research_backend
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          APP_HOSTS: traceit-02-i.comp.nus.edu.sg
+        with:
+          playbook: playbooks/teardown_django.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Teardown contact_backend
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          APP_HOSTS: traceit-03-i.comp.nus.edu.sg
+        with:
+          playbook: playbooks/teardown_django.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Teardown Database 1
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          DB_HOSTS: traceit-01-i.comp.nus.edu.sg
+        with:
+          playbook: playbooks/teardown_postgres.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Teardown proxy
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/teardown_nginx.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml

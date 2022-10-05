@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy (to Prod environment)
 on:
   workflow_dispatch:
 
@@ -6,10 +6,10 @@ jobs:
   
   deploy:
 
-    runs-on: cd-test
+    runs-on: cd
     container: 
       image: willhallonline/ansible:2.12-ubuntu-20.04
-      options: --dns 192.168.1.101
+      options: --dns 137.132.90.2 --dns 137.132.85.2 --dns 8.8.8.8
 
     steps:
       - name: Cleanup build folder

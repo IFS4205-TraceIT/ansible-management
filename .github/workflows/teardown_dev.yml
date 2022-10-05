@@ -1,4 +1,4 @@
-name: Teardown
+name: Teardown (from Dev environment)
 on:
   workflow_dispatch:
 
