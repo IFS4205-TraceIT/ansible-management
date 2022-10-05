@@ -40,5 +40,5 @@ jobs:
           playbook: playbooks/unseal_vault.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
-            --inventory hosts_dev.yml
+            --inventory hosts_prod.yml
       

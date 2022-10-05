@@ -34,7 +34,7 @@ jobs:
           playbook: playbooks/teardown_django.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
-            --inventory hosts_dev.yml
+            --inventory hosts_prod.yml
       
       - name: Teardown research_backend
         uses: dawidd6/action-ansible-playbook@v2
@@ -44,7 +44,7 @@ jobs:
           playbook: playbooks/teardown_django.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
-            --inventory hosts_dev.yml
+            --inventory hosts_prod.yml
 
       - name: Teardown contact_backend
         uses: dawidd6/action-ansible-playbook@v2
@@ -54,7 +54,7 @@ jobs:
           playbook: playbooks/teardown_django.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
-            --inventory hosts_dev.yml
+            --inventory hosts_prod.yml
 
       - name: Teardown Database 1
         uses: dawidd6/action-ansible-playbook@v2
@@ -64,7 +64,7 @@ jobs:
           playbook: playbooks/teardown_postgres.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
-            --inventory hosts_dev.yml
+            --inventory hosts_prod.yml
 
       - name: Teardown proxy
         uses: dawidd6/action-ansible-playbook@v2
@@ -72,4 +72,4 @@ jobs:
           playbook: playbooks/teardown_nginx.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
-            --inventory hosts_dev.yml
+            --inventory hosts_prod.yml

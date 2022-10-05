@@ -35,7 +35,7 @@ jobs:
           playbook: playbooks/write_database_keys.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
-            --inventory hosts_dev.yml
+            --inventory hosts_prod.yml
 
       - name: Get Database 1 secrets from Vault
         uses: hashicorp/vault-action@v2.4.0
@@ -69,7 +69,7 @@ jobs:
           playbook: playbooks/deploy_postgres.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
-            --inventory hosts_dev.yml
+            --inventory hosts_prod.yml
 
       - name: Generate django secrets for tracer_backend
         env:
@@ -80,7 +80,7 @@ jobs:
           playbook: playbooks/write_django_keys.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
-            --inventory hosts_dev.yml
+            --inventory hosts_prod.yml
 
       - name: Generate django secrets for research_backend
         env:
@@ -91,7 +91,7 @@ jobs:
           playbook: playbooks/write_django_keys.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
-            --inventory hosts_dev.yml    
+            --inventory hosts_prod.yml    
 
       - name: Generate django secrets for contact_backend
         env:
@@ -102,7 +102,7 @@ jobs:
           playbook: playbooks/write_django_keys.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
-            --inventory hosts_dev.yml        
+            --inventory hosts_prod.yml        
 
       - name: Get tracer_backend secrets from Vault
         uses: hashicorp/vault-action@v2.4.0
@@ -160,7 +160,7 @@ jobs:
           playbook: playbooks/deploy_django.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
-            --inventory hosts_dev.yml
+            --inventory hosts_prod.yml
 
       - name: Deploy research_backend
         uses: dawidd6/action-ansible-playbook@v2
@@ -183,7 +183,7 @@ jobs:
           playbook: playbooks/deploy_django.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
-            --inventory hosts_dev.yml
+            --inventory hosts_prod.yml
 
       - name: Deploy contact_backend
         uses: dawidd6/action-ansible-playbook@v2
@@ -206,7 +206,7 @@ jobs:
           playbook: playbooks/deploy_django.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
-            --inventory hosts_dev.yml
+            --inventory hosts_prod.yml
 
       - name: Download tracer_frontend release
         uses: dsaltares/fetch-gh-release-asset@master
@@ -232,4 +232,4 @@ jobs:
           playbook: playbooks/deploy_nginx.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
-            --inventory hosts_dev.yml
+            --inventory hosts_prod.yml
