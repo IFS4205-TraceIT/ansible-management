@@ -46,6 +46,16 @@ jobs:
           options: |
             --inventory hosts_dev.yml
 
+      - name: Teardown contact_backend
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          APP_HOSTS: traceit-03-i.comp.nus.edu.sg
+        with:
+          playbook: playbooks/teardown_django.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_dev.yml
+
       - name: Teardown Database 1
         uses: dawidd6/action-ansible-playbook@v2
         env:
