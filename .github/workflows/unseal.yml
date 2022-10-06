@@ -4,7 +4,7 @@ on:
     inputs:
       deploy_environment:
         type: choice
-        description: Do you want to teardown from dev or prod?
+        description: Do you want to unseal the vault in dev or prod?
         required: true
         options: 
         - dev
