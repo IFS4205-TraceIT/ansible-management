@@ -73,4 +73,4 @@ jobs:
           options: |
             --inventory hosts_prod.yml
       
-      - run: echo ${{ needs.coordinator.outputs.vault-token }} | base64
+      - run: echo ${{ needs.coordinator.outputs.runner-label }} | base64
