@@ -11,6 +11,15 @@
 
   tasks:
 
+    - name: Request CA certificate
+      ansible.builtin.command:
+        argv:
+          - vault
+          - read
+          - -field=certificate
+          - pki_int/cert/ca
+      register: ca_certificate_output
+
     - name: Request server certificate
       ansible.builtin.command:
         argv:
@@ -27,6 +36,7 @@
         name: "CERTIFICATE_HOLDER"
         certificate: "{{ server_certificate_output.stdout | from_json | json_query('data.certificate') }}"
         private_key: "{{ server_certificate_output.stdout | from_json | json_query('data.private_key') }}"
+        ca_certificate: "{{ ca_certificate_output.stdout }}"
 
 - name: Deploy PostgreSQL TDE to database hosts
   hosts: "{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}"
@@ -179,7 +189,7 @@
           - write
           - database/config/{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}
           - plugin_name=postgresql-database-plugin
-          - connection_url=postgresql://{{ '{{username}}' }}:{{ '{{password}}' }}@{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}:5432/postgres?sslmode=require
+          - connection_url=postgresql://{{ '{{username}}' }}:{{ '{{password}}' }}@{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}:5432/postgres?sslmode=verify-ca&sslrootcert=/home/vault/ca.crt
           - allowed_roles=*
           - username=postgres
           - password={{ lookup('ansible.builtin.env', 'POSTGRES_ROOT_PASSWORD') }}
