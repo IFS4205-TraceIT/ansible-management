@@ -1,3 +1,33 @@
+- name: Generate certificate for PostgreSQL service
+  hosts: vault
+  gather_facts: no
+  become: yes
+  become_user: vault
+
+  environment:
+    VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+    VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
+    VAULT_CACERT: "/home/vault/ca.crt"
+
+  tasks:
+
+    - name: Request server certificate
+      ansible.builtin.command:
+        argv:
+          - vault
+          - write
+          - -format=json
+          - pki_int/issue/{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}
+          - common_name={{ lookup('ansible.builtin.env', 'DB_HOSTS') }}
+          - ttl=767h
+      register: server_certificate_output
+
+    - name: "Add certificate output to dummy host"
+      ansible.builtin.add_host:
+        name: "CERTIFICATE_HOLDER"
+        certificate: "{{ server_certificate_output.stdout | from_json | json_query('data.certificate') }}"
+        private_key: "{{ server_certificate_output.stdout | from_json | json_query('data.private_key') }}"
+
 - name: Deploy PostgreSQL TDE to database hosts
   hosts: "{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}"
   gather_facts: no
@@ -79,6 +109,26 @@
         group: postgres
         mode: 0600
 
+    - name: Add server certificate
+      become: yes
+      become_user: postgres
+      ansible.builtin.copy:
+        dest: /opt/postgresql_db/server.crt
+        owner: postgres
+        group: postgres
+        mode: 0600
+        content: "{{ hostvars['CERTIFICATE_HOLDER']['certificate'] }}"
+
+    - name: Add server private key
+      become: yes
+      become_user: postgres
+      ansible.builtin.copy:
+        dest: /opt/postgresql_db/server.key
+        owner: postgres
+        group: postgres
+        mode: 0600
+        content: "{{ hostvars['CERTIFICATE_HOLDER']['private_key'] }}"
+
     - name: Start database service
       become: yes
       become_user: postgres
@@ -129,7 +179,7 @@
           - write
           - database/config/{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}
           - plugin_name=postgresql-database-plugin
-          - connection_url=postgresql://{{ '{{username}}' }}:{{ '{{password}}' }}@{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}:5432/postgres?sslmode=disable
+          - connection_url=postgresql://{{ '{{username}}' }}:{{ '{{password}}' }}@{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}:5432/postgres?sslmode=require
           - allowed_roles=*
           - username=postgres
           - password={{ lookup('ansible.builtin.env', 'POSTGRES_ROOT_PASSWORD') }}

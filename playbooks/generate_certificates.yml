@@ -68,7 +68,7 @@
           - common_name=TraceIT Root CA
           - issuer_name=traceit-root-ca
           - ttl=87600h
-          - key_type=ed25519
+          - key_bits=4096
       ignore_errors: yes
     
     - name: Configure CA and CRL URLs
@@ -89,7 +89,7 @@
           - pki_int/intermediate/generate/internal
           - common_name=TraceIT Intermediate CA
           - issuer_name=traceit-intermediate-ca
-          - key_type=ed25519
+          - key_bits=4096
       register: csr_output
     
     - name: Generate Intermediate CA's certificate by signing Intermediate CA's CSR
@@ -135,12 +135,12 @@
         argv:
           - vault
           - write
-          - pki_int/roles/{{ item }}
+          - pki_int/roles/{{ item }}.comp.nus.edu.sg
           - issuer_ref={{ issuer_output.stdout }}
           - allowed_domains=comp.nus.edu.sg
           - allow_subdomains=true
           - max_ttl=768h
-          - key_type=ed25519
+          - key_bits=4096
   
     - name: Request certificate for traceit-07-i
       ansible.builtin.command:
@@ -148,7 +148,7 @@
           - vault
           - write
           - -format=json
-          - pki_int/issue/traceit-07-i
+          - pki_int/issue/traceit-07-i.comp.nus.edu.sg
           - common_name=traceit-07-i.comp.nus.edu.sg
           - ttl=767h
       register: traceit_07_i_output
