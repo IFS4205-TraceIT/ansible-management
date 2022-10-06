@@ -21,7 +21,7 @@ jobs:
     runs-on: ci
     steps:
 
-      - name: Set environment settings
+      - name: Set runner settings
         id: env-settings
         run: |
           if [[ "${{ inputs.deploy_environment }}" == "prod" ]]; then
@@ -38,7 +38,6 @@ jobs:
     outputs:
       runner-label: "${{ steps.env-settings.outputs.runner-label }}"
       container-options: "${{ steps.env-settings.outputs.container-options }}"
-      vault-token: "${{ steps.env-settings.outputs.vault-token }}"
   
   unseal:
     needs: coordinator
@@ -62,10 +61,19 @@ jobs:
       - name: Clone repo
         uses: actions/checkout@v3
 
+      - name: Retrieve relevant secrets
+        id: secrets
+        run: |
+          if [[ "${{ inputs.deploy_environment }}" == "prod" ]]; then
+            echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_PROD }}'
+          else
+            echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_DEV }}'
+          fi
+
       - name: Unseal Vault
         uses: dawidd6/action-ansible-playbook@v2
         env:
-          VAULT_TOKEN: ${{ needs.coordinator.outputs.vault-token }}
+          VAULT_TOKEN: ${{ steps.secrets.outputs.vault-token }}
           UNSEAL_KEY: ${{ inputs.unseal_key }}
         with:
           playbook: playbooks/unseal_vault.yml
