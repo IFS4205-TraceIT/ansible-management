@@ -1,0 +1,106 @@
+name: Teardown from environment
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_environment:
+        type: choice
+        description: Do you want to teardown from dev or prod?
+        required: true
+        options: 
+        - dev
+        - prod
+
+jobs:
+
+  coordinator:
+    runs-on: ci
+    steps:
+
+      - name: Set environment settings
+        id: env-settings
+        run: |
+          if [[ "${{ inputs.deploy_environment }}" == "prod" ]]; then
+            echo '::set-output name=runner-label::cd'
+            echo '::set-output name=container-options::--dns 137.132.90.2 --dns 137.132.85.2 --dns 8.8.8.8'
+            echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_PROD }}'
+
+          else
+            echo '::set-output name=runner-label::cd-test'
+            echo '::set-output name=container-options::--dns 192.168.1.101 --dns 8.8.8.8'
+            echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_DEV }}'
+          fi
+    
+    outputs:
+      runner-label: "${{ steps.env-settings.outputs.runner-label }}"
+      container-options: "${{ steps.env-settings.outputs.container-options }}"
+      vault-token: "${{ steps.env-settings.outputs.vault-token }}"
+
+  teardown:
+    needs: coordinator
+    runs-on: ${{ needs.coordinator.outputs.runner-label }}
+    container: 
+      image: willhallonline/ansible:2.12-ubuntu-20.04
+      options: ${{ needs.coordinator.outputs.container-options }}
+
+    steps:
+      - name: Cleanup build folder
+        run: |
+          ls -la ./
+          rm -rf ./* || true
+          rm -rf ./.??* || true
+          ls -la ./
+
+      - name: Check installation
+        run: |
+          ansible --version
+
+      - name: Clone repo
+        uses: actions/checkout@v3
+
+      - name: Teardown tracer_backend
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          APP_HOSTS: traceit-01-i.comp.nus.edu.sg
+        with:
+          playbook: playbooks/teardown_django.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+      
+      - name: Teardown research_backend
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          APP_HOSTS: traceit-02-i.comp.nus.edu.sg
+        with:
+          playbook: playbooks/teardown_django.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Teardown contact_backend
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          APP_HOSTS: traceit-03-i.comp.nus.edu.sg
+        with:
+          playbook: playbooks/teardown_django.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Teardown Database 1
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          DB_HOSTS: traceit-01-i.comp.nus.edu.sg
+        with:
+          playbook: playbooks/teardown_postgres.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Teardown proxy
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/teardown_nginx.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml

@@ -1,0 +1,75 @@
+name: Unseal Vault (in Dev environment)
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_environment:
+        type: choice
+        description: Do you want to teardown from dev or prod?
+        required: true
+        options: 
+        - dev
+        - prod
+
+      unseal_key:
+        type: string
+        description: Key used to unseal the vault
+        required: true
+
+jobs:
+
+  coordinator:
+    runs-on: ci
+    steps:
+
+      - name: Set environment settings
+        id: env-settings
+        run: |
+          if [[ "${{ inputs.deploy_environment }}" == "prod" ]]; then
+            echo '::set-output name=runner-label::cd'
+            echo '::set-output name=container-options::--dns 137.132.90.2 --dns 137.132.85.2 --dns 8.8.8.8'
+            echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_PROD }}'
+
+          else
+            echo '::set-output name=runner-label::cd-test'
+            echo '::set-output name=container-options::--dns 192.168.1.101 --dns 8.8.8.8'
+            echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_DEV }}'
+          fi
+    
+    outputs:
+      runner-label: "${{ steps.env-settings.outputs.runner-label }}"
+      container-options: "${{ steps.env-settings.outputs.container-options }}"
+      vault-token: "${{ steps.env-settings.outputs.vault-token }}"
+  
+  unseal:
+    needs: coordinator
+    runs-on: ${{ needs.coordinator.outputs.runner-label }}
+    container: 
+      image: willhallonline/ansible:2.12-ubuntu-20.04
+      options: ${{ needs.coordinator.outputs.container-options }}
+
+    steps:
+      - name: Cleanup build folder
+        run: |
+          ls -la ./
+          rm -rf ./* || true
+          rm -rf ./.??* || true
+          ls -la ./
+
+      - name: Check installation
+        run: |
+          ansible --version
+
+      - name: Clone repo
+        uses: actions/checkout@v3
+
+      - name: Unseal Vault
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          VAULT_TOKEN: ${{ needs.coordinator.outputs.vault-token }}
+          UNSEAL_KEY: ${{ inputs.unseal_key }}
+        with:
+          playbook: playbooks/unseal_vault.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+      
