@@ -1,6 +1,8 @@
 - name: Unseal Vault on secret hosts
   hosts: vault
   gather_facts: no
+  become: yes
+  become_user: vault
 
   environment:
     VAULT_SKIP_VERIFY: true
@@ -20,8 +22,6 @@
         validate_certs: no
 
     - name: Enable TOTP Secrets Engine
-      become: yes
-      become_user: vault
       ansible.builtin.command:
         argv:
           - vault
@@ -31,8 +31,6 @@
       ignore_errors: yes
 
     - name: Enable Database Secrets Engine
-      become: yes
-      become_user: vault
       ansible.builtin.command:
         argv:
           - vault
@@ -41,9 +39,7 @@
           - database
       ignore_errors: yes
     
-    - name: KV Secrets Engine
-      become: yes
-      become_user: vault
+    - name: Enable KV Secrets Engine
       ansible.builtin.command:
         argv:
           - vault
@@ -52,13 +48,30 @@
           - kv
       ignore_errors: yes
 
-    - name: KV V2 Secrets Engine
-      become: yes
-      become_user: vault
+    - name: Enable KV V2 Secrets Engine
       ansible.builtin.command:
         argv:
           - vault
           - secrets
           - enable
           - kv-v2
+      ignore_errors: yes
+    
+    - name: Enable PKI Secrets Engine for Root CA
+      ansible.builtin.command:
+        argv:
+          - vault
+          - secrets
+          - enable
+          - pki
+      ignore_errors: yes
+
+    - name: Enable PKI Secrets Engine for Intermediate CA
+      ansible.builtin.command:
+        argv:
+          - vault
+          - secrets
+          - enable
+          - -path=pki_int
+          - pki
       ignore_errors: yes

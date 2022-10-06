@@ -34,20 +34,12 @@
         name: vault
         update_cache: yes
 
-    - name: Checkout repository
-      become: yes
-      become_user: vault
-      ansible.builtin.git:
-        repo: "https://{{ lookup('ansible.builtin.env', 'GITHUB_TOKEN') }}@github.com/IFS4205-TraceIT/vault-management"
-        dest: /home/vault/repo
-
     - name: Copy configuration file
       become: yes
       become_user: vault
       ansible.builtin.copy:
-        src: /home/vault/repo/vault.hcl
+        src: vault/vault.hcl
         dest: /etc/vault.d/vault.hcl
-        remote_src: yes
 
     - name: Start vault service
       ansible.builtin.systemd:
