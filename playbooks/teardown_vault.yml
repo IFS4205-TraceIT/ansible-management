@@ -21,11 +21,6 @@
         path: /opt/vault/tls
         state: absent
 
-    - name: Delete repository
-      ansible.builtin.file:
-        path: /home/vault/repo
-        state: absent
-
     - name: Delete configuration file
       ansible.builtin.file:
         path: /etc/vault.d/vault.hcl
