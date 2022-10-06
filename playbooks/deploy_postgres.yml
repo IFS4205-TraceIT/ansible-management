@@ -63,25 +63,21 @@
       become: yes
       become_user: postgres
       ansible.builtin.copy:
+        src: postgresql/pg_hba.conf
         dest: /opt/postgresql_db/pg_hba.conf
         owner: postgres
         group: postgres
         mode: 0600
-        content: |
-          # TYPE  DATABASE        USER            ADDRESS                 METHOD
-
-          # "local" is for Unix domain socket connections only
-          local   all             postgres                                trust
-          # IPv4 local connections:
-          host    all             all             0.0.0.0/0               scram-sha-256
-
-    - name: Apply listen_addresses
+       
+    - name: Apply postgresql.conf
       become: yes
       become_user: postgres
-      ansible.builtin.lineinfile:
-        path: /opt/postgresql_db/postgresql.conf
-        search_string: "#listen_addresses = 'localhost'"
-        line: "listen_addresses = '*'"
+      ansible.builtin.copy:
+        src: postgresql/postgresql.conf
+        dest: /opt/postgresql_db/postgresql.conf
+        owner: postgres
+        group: postgres
+        mode: 0600
 
     - name: Start database service
       become: yes
