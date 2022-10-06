@@ -7,8 +7,39 @@
   environment:
     VAULT_SKIP_VERIFY: true
     VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+    VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
 
   tasks:
+
+     - name: Unseal vault
+      ansible.builtin.uri:
+        url: https://127.0.0.1:8200/v1/sys/unseal
+        method: POST
+        body:
+          key: "{{ lookup('ansible.builtin.env', 'UNSEAL_KEY') }}"
+        body_format: json
+        headers:
+          Content-Type: "application/json"
+        validate_certs: no
+
+    - name: Enable PKI Secrets Engine for Root CA
+      ansible.builtin.command:
+        argv:
+          - vault
+          - secrets
+          - enable
+          - pki
+      ignore_errors: yes
+
+    - name: Enable PKI Secrets Engine for Intermediate CA
+      ansible.builtin.command:
+        argv:
+          - vault
+          - secrets
+          - enable
+          - -path=pki_int
+          - pki
+      ignore_errors: yes
 
     - name: Tune PKI secrets engine for Root CA
       ansible.builtin.command:
@@ -143,3 +174,9 @@
     - name: Reload Vault without getting sealed
       ansible.builtin.shell: |
         kill -SIGHUP $(pidof vault)
+
+    - name: Save Intermediate CA's certificate to disk
+      ansible.builtin.get_url:
+        url: https://traceit-07-i.comp.nus.edu.sg:8200/v1/pki_int/cert/ca
+        dest: /home/vault/ca.crt
+        validate_certs: no

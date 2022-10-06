@@ -114,8 +114,9 @@
   gather_facts: no
 
   environment:
-    VAULT_SKIP_VERIFY: true
     VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+    VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
+    VAULT_CACERT: "/home/vault/ca.crt"
 
   tasks:
 
