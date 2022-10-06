@@ -11,9 +11,9 @@
 
   tasks:
 
-     - name: Unseal vault
+    - name: Unseal vault
       ansible.builtin.uri:
-        url: https://127.0.0.1:8200/v1/sys/unseal
+        url: "https://127.0.0.1:8200/v1/sys/unseal"
         method: POST
         body:
           key: "{{ lookup('ansible.builtin.env', 'UNSEAL_KEY') }}"
@@ -153,14 +153,6 @@
           - ttl=767h
       register: traceit_07_i_output
     
-    - name: Stop Vault service
-      become: yes
-      become_user: root
-      ansible.builtin.systemd:
-        name: vault
-        enabled: yes
-        state: stopped
-    
     - name: Update Vault server certificate
       ansible.builtin.copy:
         dest: /opt/vault/tls/tls.crt
@@ -174,9 +166,9 @@
     - name: Reload Vault without getting sealed
       ansible.builtin.shell: |
         kill -SIGHUP $(pidof vault)
+      args:
+        executable: /bin/bash
 
     - name: Save Intermediate CA's certificate to disk
-      ansible.builtin.get_url:
-        url: https://traceit-07-i.comp.nus.edu.sg:8200/v1/pki_int/cert/ca
-        dest: /home/vault/ca.crt
-        validate_certs: no
+      ansible.builtin.shell: |
+        vault read -field=certificate pki_int/cert/ca > /home/vault/ca.crt
