@@ -1,0 +1,146 @@
+- name: Generate TLS certificates using Vault
+  hosts: vault
+  gather_facts: no
+  become: yes
+  become_user: vault
+
+  environment:
+    VAULT_SKIP_VERIFY: true
+    VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+
+  tasks:
+
+    - name: Tune PKI secrets engine for Root CA
+      ansible.builtin.command:
+        argv:
+          - vault
+          - secrets
+          - tune
+          - -max-lease-ttl=87600h
+          - pki
+    
+    - name: Tune PKI secrets engine for Intermediate CA
+      ansible.builtin.command:
+        argv:
+          - vault
+          - secrets
+          - tune
+          - -max-lease-ttl=43800h
+          - pki_int
+
+    - name: Create Root CA
+      ansible.builtin.command:
+        argv:
+          - vault
+          - write
+          - pki/root/generate/internal
+          - common_name=TraceIT Root CA
+          - issuer_name=traceit-root-ca
+          - ttl=87600h
+      ignore_errors: yes
+    
+    - name: Configure CA and CRL URLs
+      ansible.builtin.command:
+        argv:
+          - vault
+          - write
+          - pki/config/urls
+          - issuing_certificates=https://traceit-07-i.comp.nus.edu.sg/v1/pki/ca
+          - crl_distribution_points=https://traceit-07-i.comp.nus.edu.sg/v1/pki/crl
+    
+    - name: Generate Intermediate CA's CSR
+      ansible.builtin.command:
+        argv:
+          - vault
+          - write
+          - -format=json
+          - pki_int/intermediate/generate/internal
+          - common_name=TraceIT Intermediate CA
+          - issuer_name=traceit-intermediate-ca
+      register: csr_output
+    
+    - name: Generate Intermediate CA's certificate by signing Intermediate CA's CSR
+      ansible.builtin.command:
+        argv:
+          - vault
+          - write
+          - -format=json
+          - pki/root/sign-intermediate
+          - issuer_ref=traceit-root-ca
+          - csr={{ csr_output.stdout | from_json | json_query('data.csr') }}
+          - format=pem_bundle
+          - ttl=43800h
+      register: cert_output
+
+    - name: Import Intermediate CA's certificate
+      ansible.builtin.command:
+        argv:
+          - vault
+          - write
+          - pki_int/intermediate/set-signed
+          - certificate={{ cert_output.stdout | from_json | json_query('data.certificate') }}
+
+    - name: Get Intermediate CA's issuer
+      ansible.builtin.command:
+        argv:
+          - vault
+          - read
+          - -field=default
+          - pki_int/config/issuers
+      register: issuer_output
+
+    - name: Create roles for traceit-01-i to traceit-07-i
+      loop:
+        - traceit-01-i
+        - traceit-02-i
+        - traceit-03-i
+        - traceit-04-i
+        - traceit-05-i
+        - traceit-06-i
+        - traceit-07-i
+      ansible.builtin.command:
+        argv:
+          - vault
+          - write
+          - pki_int/roles/{{ item }}
+          - issuer_ref={{ issuer_output.stdout }}
+          - allowed_domains=comp.nus.edu.sg
+          - allow_subdomains=true
+          - max_ttl=768h
+  
+    - name: Request certificate for traceit-07-i
+      ansible.builtin.command:
+        argv:
+          - vault
+          - write
+          - -format=json
+          - pki_int/issue/traceit-07-i
+          - common_name=traceit-07-i.comp.nus.edu.sg
+          - ttl=767h
+      register: traceit_07_i_output
+    
+    - name: Stop Vault service
+      become: yes
+      become_user: root
+      ansible.builtin.systemd:
+        name: vault
+        enabled: yes
+        state: stopped
+    
+    - name: Update Vault server certificate
+      ansible.builtin.copy:
+        dest: /opt/vault/tls/tls.crt
+        content: "{{ traceit_07_i_output.stdout | from_json | json_query('data.certificate') }}"
+    
+    - name: Update Vault server private key
+      ansible.builtin.copy:
+        dest: /opt/vault/tls/tls.key
+        content: "{{ traceit_07_i_output.stdout | from_json | json_query('data.private_key') }}"
+    
+    - name: Start Vault service
+      become: yes
+      become_user: root
+      ansible.builtin.systemd:
+        name: vault
+        enabled: yes
+        state: started
