@@ -16,24 +16,20 @@ jobs:
     runs-on: ci
     steps:
 
-      - name: Set environment settings
-        id: env-settings
+      - name: Configure runner settings
+        id: runner-settings
         run: |
           if [[ "${{ inputs.deploy_environment }}" == "prod" ]]; then
             echo '::set-output name=runner-label::cd'
             echo '::set-output name=container-options::--dns 137.132.90.2 --dns 137.132.85.2 --dns 8.8.8.8'
-            echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_PROD }}'
-
           else
             echo '::set-output name=runner-label::cd-test'
             echo '::set-output name=container-options::--dns 192.168.1.101 --dns 8.8.8.8'
-            echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_DEV }}'
           fi
     
     outputs:
-      runner-label: "${{ steps.env-settings.outputs.runner-label }}"
-      container-options: "${{ steps.env-settings.outputs.container-options }}"
-      vault-token: "${{ steps.env-settings.outputs.vault-token }}"
+      runner-label: "${{ steps.runner-settings.outputs.runner-label }}"
+      container-options: "${{ steps.runner-settings.outputs.container-options }}"
 
   teardown:
     needs: coordinator
@@ -56,6 +52,15 @@ jobs:
 
       - name: Clone repo
         uses: actions/checkout@v3
+      
+      - name: Retrieve relevant secrets
+        id: secrets
+        run: |
+          if [[ "${{ inputs.deploy_environment }}" == "prod" ]]; then
+            echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_PROD }}'
+          else
+            echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_DEV }}'
+          fi
 
       - name: Teardown tracer_backend
         uses: dawidd6/action-ansible-playbook@v2

@@ -16,24 +16,20 @@ jobs:
     runs-on: ci
     steps:
 
-      - name: Set environment settings
-        id: env-settings
+      - name: Configure runner settings
+        id: runner-settings
         run: |
           if [[ "${{ inputs.deploy_environment }}" == "prod" ]]; then
             echo '::set-output name=runner-label::cd'
             echo '::set-output name=container-options::--dns 137.132.90.2 --dns 137.132.85.2 --dns 8.8.8.8'
-            echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_PROD }}'
-
           else
             echo '::set-output name=runner-label::cd-test'
             echo '::set-output name=container-options::--dns 192.168.1.101 --dns 8.8.8.8'
-            echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_DEV }}'
           fi
     
     outputs:
-      runner-label: "${{ steps.env-settings.outputs.runner-label }}"
-      container-options: "${{ steps.env-settings.outputs.container-options }}"
-      vault-token: "${{ steps.env-settings.outputs.vault-token }}"
+      runner-label: "${{ steps.runner-settings.outputs.runner-label }}"
+      container-options: "${{ steps.runner-settings.outputs.container-options }}"
   
   deploy:
     needs: coordinator
@@ -56,11 +52,20 @@ jobs:
 
       - name: Clone repo
         uses: actions/checkout@v3
+      
+      - name: Retrieve relevant secrets
+        id: secrets
+        run: |
+          if [[ "${{ inputs.deploy_environment }}" == "prod" ]]; then
+            echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_PROD }}'
+          else
+            echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_DEV }}'
+          fi
 
       - name: Generate database secrets for Database 1
         env:
           DATABASE_NAME: database1
-          VAULT_TOKEN: ${{ needs.coordinator.outputs.vault-token }}
+          VAULT_TOKEN: ${{ steps.secrets.outputs.vault-token }}
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: playbooks/write_database_keys.yml
@@ -73,7 +78,7 @@ jobs:
         id: database1-secrets
         with:
           url: https://traceit-07-i.comp.nus.edu.sg:8200
-          token: ${{ needs.coordinator.outputs.vault-token }}
+          token: ${{ steps.secrets.outputs.vault-token }}
           tlsSkipVerify: true
           secrets: |
               kv/database1 tde_key | TDE_KEY;
@@ -95,7 +100,7 @@ jobs:
           DB_HOSTS: traceit-01-i.comp.nus.edu.sg
           TDE_KEY:                "${{ steps.database1-secrets.outputs.TDE_KEY }}"
           POSTGRES_ROOT_PASSWORD: "${{ steps.database1-secrets.outputs.POSTGRES_ROOT_PASSWORD }}"
-          VAULT_TOKEN:            "${{ needs.coordinator.outputs.vault-token }}"
+          VAULT_TOKEN:            "${{ steps.secrets.outputs.vault-token }}"
         with:
           playbook: playbooks/deploy_postgres.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -105,7 +110,7 @@ jobs:
       - name: Generate django secrets for tracer_backend
         env:
           APP_NAME: tracer_backend
-          VAULT_TOKEN: ${{ needs.coordinator.outputs.vault-token }}
+          VAULT_TOKEN: ${{ steps.secrets.outputs.vault-token }}
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: playbooks/write_django_keys.yml
@@ -116,7 +121,7 @@ jobs:
       - name: Generate django secrets for research_backend
         env:
           APP_NAME: research_backend
-          VAULT_TOKEN: ${{ needs.coordinator.outputs.vault-token }}
+          VAULT_TOKEN: ${{ steps.secrets.outputs.vault-token }}
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: playbooks/write_django_keys.yml
@@ -127,7 +132,7 @@ jobs:
       - name: Generate django secrets for contact_backend
         env:
           APP_NAME: contact_backend
-          VAULT_TOKEN: ${{ needs.coordinator.outputs.vault-token }}
+          VAULT_TOKEN: ${{ steps.secrets.outputs.vault-token }}
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: playbooks/write_django_keys.yml
@@ -140,7 +145,7 @@ jobs:
         id: tracer_backend-secrets
         with:
           url: https://traceit-07-i.comp.nus.edu.sg:8200
-          token: ${{ needs.coordinator.outputs.vault-token }}
+          token: ${{ steps.secrets.outputs.vault-token }}
           tlsSkipVerify: true
           secrets: |
               kv/tracer_backend secret_key | DJANGO_SECRET_KEY;
@@ -153,7 +158,7 @@ jobs:
         id: research_backend-secrets
         with:
           url: https://traceit-07-i.comp.nus.edu.sg:8200
-          token: ${{ needs.coordinator.outputs.vault-token }}
+          token: ${{ steps.secrets.outputs.vault-token }}
           tlsSkipVerify: true
           secrets: |
               kv/research_backend secret_key | DJANGO_SECRET_KEY;
@@ -166,7 +171,7 @@ jobs:
         id: contact_backend-secrets
         with:
           url: https://traceit-07-i.comp.nus.edu.sg:8200
-          token: ${{ needs.coordinator.outputs.vault-token }}
+          token: ${{ steps.secrets.outputs.vault-token }}
           tlsSkipVerify: true
           secrets: |
               kv/contact_backend secret_key | DJANGO_SECRET_KEY;
@@ -182,7 +187,7 @@ jobs:
           REPOSITORY: "IFS4205-TraceIT/tracer-backend"
           APP_NAME: tracer_backend
           DJANGO_SECRET_KEY: "${{ steps.tracer_backend-secrets.outputs.DJANGO_SECRET_KEY }}"
-          VAULT_TOKEN: ${{ needs.coordinator.outputs.vault-token }}
+          VAULT_TOKEN: ${{ steps.secrets.outputs.vault-token }}
           POSTGRES_HOST: traceit-01-i.comp.nus.edu.sg
           POSTGRES_DB: postgres
           POSTGRES_USER: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_USER }}"
@@ -201,7 +206,7 @@ jobs:
           REPOSITORY: "IFS4205-TraceIT/research-backend"
           APP_NAME: research_backend
           DJANGO_SECRET_KEY: "${{ steps.research_backend-secrets.outputs.DJANGO_SECRET_KEY }}"
-          VAULT_TOKEN: ${{ needs.coordinator.outputs.vault-token }}
+          VAULT_TOKEN: ${{ steps.secrets.outputs.vault-token }}
           POSTGRES_HOST: traceit-01-i.comp.nus.edu.sg
           POSTGRES_DB: postgres
           # POSTGRES_USER: "${{ steps.research_backend-secrets.outputs.POSTGRES_USER }}"
@@ -224,7 +229,7 @@ jobs:
           REPOSITORY: "IFS4205-TraceIT/contact-backend"
           APP_NAME: contact_backend
           DJANGO_SECRET_KEY: "${{ steps.contact_backend-secrets.outputs.DJANGO_SECRET_KEY }}"
-          VAULT_TOKEN: ${{ needs.coordinator.outputs.vault-token }}
+          VAULT_TOKEN: ${{ steps.secrets.outputs.vault-token }}
           POSTGRES_HOST: traceit-01-i.comp.nus.edu.sg
           POSTGRES_DB: postgres
           # POSTGRES_USER: "${{ steps.contact_backend-secrets.outputs.POSTGRES_USER }}"
