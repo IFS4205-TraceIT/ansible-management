@@ -1,4 +1,4 @@
-name: Unseal Vault (in Dev environment)
+name: Unseal Vault
 on:
   workflow_dispatch:
     inputs:
