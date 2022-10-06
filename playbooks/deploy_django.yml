@@ -1,3 +1,43 @@
+- name: Generate certificate for Gunicorn service
+  hosts: vault
+  gather_facts: no
+  become: yes
+  become_user: vault
+
+  environment:
+    VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+    VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
+    VAULT_CACERT: "/home/vault/ca.crt"
+
+  tasks:
+
+    - name: Request CA certificate
+      ansible.builtin.command:
+        argv:
+          - vault
+          - read
+          - -field=certificate
+          - pki_int/cert/ca
+      register: ca_certificate_output
+
+    - name: Request server certificate
+      ansible.builtin.command:
+        argv:
+          - vault
+          - write
+          - -format=json
+          - pki_int/issue/{{ lookup('ansible.builtin.env', 'APP_HOSTS') }}
+          - common_name={{ lookup('ansible.builtin.env', 'APP_HOSTS') }}
+          - ttl=767h
+      register: server_certificate_output
+
+    - name: "Add certificate output to dummy host"
+      ansible.builtin.add_host:
+        name: "CERTIFICATE_HOLDER"
+        certificate: "{{ server_certificate_output.stdout | from_json | json_query('data.certificate') }}"
+        private_key: "{{ server_certificate_output.stdout | from_json | json_query('data.private_key') }}"
+        ca_certificate: "{{ ca_certificate_output.stdout }}"
+
 - name: Deploy Django + Gunicorn to app servers
   hosts: "{{ lookup('ansible.builtin.env', 'APP_HOSTS') }}"
   gather_facts: no
@@ -43,6 +83,26 @@
         poetry config --local virtualenvs.options.no-setuptools true
         poetry config --local virtualenvs.options.no-pip true
         poetry install --no-interaction
+    
+    - name: Add server certificate
+      become: yes
+      become_user: django
+      ansible.builtin.copy:
+        dest: /home/django/repo/server.crt
+        owner: django
+        group: django
+        mode: 0600
+        content: "{{ hostvars['CERTIFICATE_HOLDER']['certificate'] }}"
+
+    - name: Add server private key
+      become: yes
+      become_user: django
+      ansible.builtin.copy:
+        dest: /home/django/repo/server.key
+        owner: django
+        group: django
+        mode: 0600
+        content: "{{ hostvars['CERTIFICATE_HOLDER']['private_key'] }}"
 
     - name: Perform database migrations
       become: yes
@@ -76,7 +136,7 @@
         chdir: /home/django/repo
       ansible.builtin.shell: |
         export PATH=/home/django/.local/bin:$PATH
-        poetry run gunicorn -w 5 --bind 0.0.0.0:8000 {{ lookup('ansible.builtin.env', 'APP_NAME') }}.wsgi:application --daemon --pid {{ lookup('ansible.builtin.env', 'APP_NAME') }}.pid
+        poetry run gunicorn -w 5 --bind 0.0.0.0:8000 {{ lookup('ansible.builtin.env', 'APP_NAME') }}.wsgi:application --daemon --pid {{ lookup('ansible.builtin.env', 'APP_NAME') }}.pid --certfile=server.crt --keyfile=server.key
       environment:
         # Django
         DJANGO_SECRET_KEY: "{{ lookup('ansible.builtin.env', 'DJANGO_SECRET_KEY') }}"
