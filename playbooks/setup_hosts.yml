@@ -9,7 +9,7 @@
       ansible.posix.authorized_key:
         user: sadm
         state: present
-        key: "{{ lookup('ansible.builtin.env', 'PUBLIC_KEY') }}"
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_ed25519.pub') }"
     
     - name: Configure passwordless sudo
       community.general.sudoers:
