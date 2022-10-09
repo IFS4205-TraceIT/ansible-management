@@ -110,4 +110,3 @@ Steps:
         -i hosts_prod.yml \
         playbooks/generate_certificates.yml
     ```
-

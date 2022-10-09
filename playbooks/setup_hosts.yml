@@ -1,4 +1,4 @@
-- name: Setup remote hosts for orchestration
+- name: Setup hosts
   hosts: all
   gather_facts: no
   become: yes
@@ -9,7 +9,7 @@
       ansible.posix.authorized_key:
         user: sadm
         state: present
-        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_ed25519.pub') }"
+        key: "{{ lookup('file', lookup('ansible.builtin.env','HOME') + '/.ssh/id_ed25519.pub') }"
     
     - name: Configure passwordless sudo
       community.general.sudoers:

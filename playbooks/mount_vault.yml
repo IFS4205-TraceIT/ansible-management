@@ -1,4 +1,4 @@
-- name: Unseal Vault
+- name: Mount secret engines
   hosts: vault
   gather_facts: no
   become: yes
@@ -6,21 +6,9 @@
 
   environment:
     VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
-    VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
-    VAULT_CACERT: "/home/vault/ca.crt"
+    VAULT_ADDR: "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}"
 
   tasks:
-
-    - name: Unseal vault
-      ansible.builtin.uri:
-        method: POST
-        url: https://traceit-07-i.comp.nus.edu.sg:8200
-        body:
-          key: "{{ lookup('ansible.builtin.env', 'UNSEAL_KEY') }}"
-        body_format: json
-        headers:
-          Content-Type: "application/json"
-        validate_certs: no
 
     - name: Enable TOTP Secrets Engine
       ansible.builtin.command:

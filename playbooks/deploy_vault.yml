@@ -1,18 +1,14 @@
-- name: Deploy Vault to secret hosts
+- name: Deploy Vault
   hosts: vault
   gather_facts: no
-  become: yes # Sudo as root
-
-  environment:
-    VAULT_SKIP_VERIFY: true
-    VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
+  become: yes
 
   tasks:
 
     - name: Create vault user
       ansible.builtin.user:
         name: vault
-        shell: /bin/false # Don't allow login
+        shell: /bin/false
 
     - name: Install gpg
       ansible.builtin.apt:
@@ -59,11 +55,13 @@
           - vault
           - operator
           - init
-          - "-key-shares={{ lookup('ansible.builtin.env', 'KEY_SHARES', default='1') }}"
-          - "-key-threshold={{ lookup('ansible.builtin.env', 'KEY_THRESHOLD', default='1') }}"
+          - -key-shares=1
+          - -key-threshold=1
+      environment:
+        VAULT_SKIP_VERIFY: true
+        VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
       register: vault_output
-
-    - name: Print unseal key(s) and initial root token
+      
+    - name: Print unseal key and initial root token
       debug: 
-        msg:
-          - "{{ vault_output.stdout_lines }}"
+        var: vault_output.stdout_lines
