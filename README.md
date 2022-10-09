@@ -1,5 +1,43 @@
 # ansible-management
 
+This repository houses the `Github Action` workflows and `Ansible` playbooks that automate the deployment and teardown of the `TraceIT` infrastructure.
+
+Triggering a `Github Action` workflow is really ***simple***:
+* Browse to the [`Actions` page](https://github.com/IFS4205-TraceIT/ansible-management/actions)
+* Click on the target workflow on the left
+* Click on `Run workflow` on the right
+* Fill in the required information
+* Hit the green `Run workflow` button
+* Wait for a new workflow run to appear in the list with the yellow status
+
+Once the status of the workflow run turns green, it means that the workflow had ran successfully. If the status turns red, it means that a step in the workflow might have failed.
+
+# Table of Contents
+1. [Day-to-Day operations](#day-to-day-operations)
+
+## Day-to-Day operations
+
+### Unsealing the Vault
+
+> The Vault becomes sealed when the Vault service is stopped, which is normally when the machine shuts down or restarts. Therefore, when the machine is first booted up again, the Vault would require unsealing to be performed.
+
+Steps:
+1. Run the [`Unseal Vault` workflow](https://github.com/IFS4205-TraceIT/ansible-management/actions/workflows/unseal.yml) while specifying which environment to run it in and the corresponding unseal key for that environment.
+
+### Tearing down the `TraceIT` Infrastructure
+
+Steps:
+1. Run the [`Teardown from environment` workflow](https://github.com/IFS4205-TraceIT/ansible-management/actions/workflows/teardown.yml) while specifying which environment to run it in.
+
+### Deploying the `TraceIT` infrastructure
+
+> It is **highly recommended** to perform the teardown of the `TraceIT` infrastructure first before attempting to deploy it. This is because the deployment workflow was designed to run on a clean environment (i.e no files / configurations / installations / processes from the previous deployment that may potentially affect the next).
+
+Steps:
+1. Perform [Unsealing the Vault](#unsealing-the-vault) if the Vault is not already unsealed.
+2. Perform [Tearing down the `TraceIT` Infrastructure](#tearing-down-the-traceit-infrastructure) if this is not the first deployment or it is unclear whether the environment is clean.
+3. Run the [`Deploy to environment` workflow](https://github.com/IFS4205-TraceIT/ansible-management/actions/workflows/deploy.yml) while specifying which environment to run it in.
+
 ## Install `ansible`
 
 ```bash
