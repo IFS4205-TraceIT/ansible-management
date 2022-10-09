@@ -54,7 +54,7 @@ Steps:
 
 > Any Ubuntu environment **completely separate** from the virtual machines in the `prod` and `dev` environment can serve as the operator workstation. The operator workstation is used to run `Ansible` playbooks that are normally executed once or pertains to **really really sensitive** operations. Each environment should have their own separate operator workstation.
 
-> The operator workstation will also house the `SSH` keypair whose private key is the **exact same** as the one stored as `SSH_PRIVATE_KEY` in the `Github Action` secrets of this repository.
+> The operator workstation will also house the `SSH` keypair whose private key is the **exact same** as the one stored as `SSH_PRIVATE_KEY` in the `Github Action` secrets of this repository. This also implies that the same `SSH` keypair is used in both the `prod` and `dev` environment.
 
 Steps:
 
@@ -70,6 +70,8 @@ Steps:
     > If there is already an existing `SSH` keypair, ensure that it meets the following requirements:
     > * Located in the `$HOME/.ssh` directory with the name  `id_ed25519` and configured with the right permissions.
     > * Has no passphrase configured on it
+
+3. Add the contents of the private key to `Github Action` secrets as `SSH_PRIVATE_KEY`.
 
 ### The orchestrated hosts in the `prod` and `dev` environment
 
@@ -98,7 +100,7 @@ Steps:
     
 2) Save the unseal key **offline** outputted from step 1.
 
-3) Save the initial root token as: 
+3) Save the initial root token to `Github Action` secrets as: 
     * `VAULT_TOKEN_DEV` if you are deploying in the `dev` environment
     * `VAULT_TOKEN_PROD` if you are deploying in the `prod` environment
 
