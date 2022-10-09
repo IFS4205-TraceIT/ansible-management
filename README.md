@@ -10,10 +10,20 @@ Triggering a `Github Action` workflow is really ***simple***:
 * Hit the green `Run workflow` button
 * Wait for a new workflow run to appear in the list with the yellow status
 
-Once the status of the workflow run turns green, it means that the workflow had ran successfully. If the status turns red, it means that a step in the workflow might have failed.
+Once the status of the workflow run turns green :heavy_check_mark:, it means that the workflow had ran successfully. If the status turns red ❌, it means that a step in the workflow might have failed.
 
-# Table of Contents
-1. [Day-to-Day operations](#day-to-day-operations)
+## Table of Contents
+
+- [ansible-management](#ansible-management)
+  - [Table of Contents](#table-of-contents)
+  - [Day-to-Day operations](#day-to-day-operations)
+    - [Unsealing the Vault](#unsealing-the-vault)
+    - [Tearing down the `TraceIT` Infrastructure](#tearing-down-the-traceit-infrastructure)
+    - [Deploying the `TraceIT` infrastructure](#deploying-the-traceit-infrastructure)
+  - [Setting up](#setting-up)
+    - [The operator workstation](#the-operator-workstation)
+    - [The orchestrated hosts in the `prod` and `dev` environment](#the-orchestrated-hosts-in-the-prod-and-dev-environment)
+    - [The `Vault` server](#the-vault-server)
 
 ## Day-to-Day operations
 
@@ -27,7 +37,7 @@ Steps:
 ### Tearing down the `TraceIT` Infrastructure
 
 Steps:
-1. Run the [`Teardown from environment` workflow](https://github.com/IFS4205-TraceIT/ansible-management/actions/workflows/teardown.yml) while specifying which environment to run it in.
+1. Run the [`Teardown from environment` workflow](https://github.com/IFS4205-TraceIT/ansible-management/actions/workflows/teardown.yml) while specifying which environment to execute it in.
 
 ### Deploying the `TraceIT` infrastructure
 
@@ -36,104 +46,66 @@ Steps:
 Steps:
 1. Perform [Unsealing the Vault](#unsealing-the-vault) if the Vault is not already unsealed.
 2. Perform [Tearing down the `TraceIT` Infrastructure](#tearing-down-the-traceit-infrastructure) if this is not the first deployment or it is unclear whether the environment is clean.
-3. Run the [`Deploy to environment` workflow](https://github.com/IFS4205-TraceIT/ansible-management/actions/workflows/deploy.yml) while specifying which environment to run it in.
+3. Run the [`Deploy to environment` workflow](https://github.com/IFS4205-TraceIT/ansible-management/actions/workflows/deploy.yml) while specifying which environment to execute it in.
 
-## Install `ansible`
+## Setting up
 
-```bash
-chmod +x setup_ansible.sh
-sudo ./setup_ansible.sh
-```
+### The operator workstation
 
-## Prepare remote hosts for orchestration
+> Any Ubuntu environment **completely separate** from the virtual machines in the `prod` and `dev` environment can serve as the operator workstation. The operator workstation is used to run `Ansible` playbooks that are normally executed once or pertains to **really really sensitive** operations. Each environment should have their own separate operator workstation.
 
-```bash
-ssh-keygen -t ed25519
-export PUBLIC_KEY="$(cat ~/.ssh/id_ed25519.pub)"
-ansible-playbook playbooks/setup_hosts.yml \
-    -i hosts_prod.yml \
-    -Kk
-```
+> The operator workstation will also house the `SSH` keypair whose private key is the **exact same** as the one stored as `SSH_PRIVATE_KEY` in the `Github Action` secrets of this repository.
 
-## To deploy Vault to secret hosts
+Steps:
 
-```bash
-export GITHUB_TOKEN=<GITHUB_TOKEN> \ 
-    KEY_SHARES=<KEY_SHARES> \
-    KEY_THRESHOLD=<KEY_THRESHOLD>
-ansible-playbook playbooks/deploy_vault.yml \
-    -i hosts_prod.yml 
-```
-
-## To deploy PostgreSQL TDE to database hosts
-
-```bash
-export TDE_KEY=<TDE_KEY> \
-    DB_HOSTS=<IP/HOSTNAME> \
-    ARTIFACT_URL=<ARTIFACT_URL> \
-    ARTIFACT_SHA256=<ARTIFACT_SHA256> \
-    GITHUB_TOKEN=<GITHUB_TOKEN>
-ansible-playbook playbooks/deploy_postgres.yml \
-    -i hosts_prod.yml 
-```
-
-## To deploy Django to app hosts
-
-```bash
-export GITHUB_TOKEN=<GITHUB_TOKEN> \
-    REPOSITORY=<REPOSITORY> \
-ansible-playbook playbooks/deploy_django.yml \
-    -i hosts_prod.yml 
-```
-
-## To deploy NGINX to proxy hosts
-
-```bash
-ansible-playbook playbooks/deploy_nginx.yml \
-    -i hosts_prod.yml 
-```
-
-
-## Workflow
-
-### Preparing workstation
-
-1) Have an environment with `ansible` installed.
+1. Install `ansible` by running the `setup_ansible.sh` script.
     ```bash
-    sudo ./setup_ansible.sh
+    ./setup_ansible.sh
     ```
 
-### Setting up remote hosts for ansible orchestration
-
-1) Setup SSH keypair:
+2. If there is no existing `SSH` keypair yet, generate a new one.
     ```bash
-    ssh-keygen -t ed25519
+    ssh-keygen -t ed25519 -f $HOME/.ssh/id_ed25519 -q -N ""
     ```
+    > If there is already an existing `SSH` keypair, ensure that it meets the following requirements:
+    > * Located in the `$HOME/.ssh` directory with the name  `id_ed25519` and configured with the right permissions.
+    > * Has no passphrase configured on it
 
-    Save the public and private keys into this repository's Github Secrets:
+### The orchestrated hosts in the `prod` and `dev` environment
 
+> Ensure that all hosts have a user called `sadm` that has `sudo` rights to run any commands as `root` and can be remotely logged in via `SSH`.
+
+Steps:  
+
+1.  Execute the `setup_hosts.yml` playbook:
     ```bash
-    SSH_PRIVATE_KEY: <Contents of SSH private key>
-    SSH_PUBLIC_KEY: <Contents of SSH public key>
+    ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook \
+        -i hosts_prod.yml
+        -Kk
+        playbooks/setup_hosts.yml
     ```
 
-2) Setup remote hosts:
+### The `Vault` server
+
+Steps:
+
+1) Deploy `Vault` to the server:
     ```bash
-    ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i hosts_prod.yml playbooks/setup_hosts.yml -Kk
+    ansible-playbook \
+        -i hosts_prod.yml \
+        playbooks/deploy_vault.yml
     ```
+    
+2) Save the unseal key **offline** outputted from step 1.
 
-### Setting up `vault`
+3) Save the initial root token as: 
+    * `VAULT_TOKEN_DEV` if you are deploying in the `dev` environment
+    * `VAULT_TOKEN_PROD` if you are deploying in the `prod` environment
 
-1) Deploy `vault`:
+4) Setup the PKI and update `Vault` to use the newly issued certificate:
     ```bash
-    GITHUB_TOKEN=... ansible-playbook -i hosts_prod.yml playbooks/deploy_vault.yml
-    ```
-    **Save the unseal key offline** and save the initial root token into this repository's Github Secrets:
-    ```
-    VAULT_TOKEN: <Initial Root Token>
+    ansible-playbook \
+        -i hosts_prod.yml \
+        playbooks/generate_certificates.yml
     ```
 
-2) Unseal `vault`:
-    ```bash
-    UNSEAL_KEY=... ansible-playbook -i hosts_prod.yml playbooks/unseal_vault.yml
-    ```
