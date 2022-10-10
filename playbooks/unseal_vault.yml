@@ -6,7 +6,6 @@
 
   environment:
     VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
-    VAULT_CACERT: "/home/vault/ca.crt"
 
   tasks:
 
@@ -20,5 +19,5 @@
         headers:
           Content-Type: "application/json"
         validate_certs: yes
-        ca_path: /home/vault/ca.crt
+        ca_path: /usr/local/share/ca-certificates/traceit-ca.crt
 
