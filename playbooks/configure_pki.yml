@@ -162,7 +162,7 @@
     - name: Write certificate to disk
       ansible.builtin.copy:
         dest: /usr/local/share/ca-certificates/traceit-ca.crt
-        content: "{{ ca_certificate_output }}"
+        content: "{{ ca_certificate_output.data.data.ca_chain }}"
     
     - name: Update trust store
       ansible.builtin.command:
