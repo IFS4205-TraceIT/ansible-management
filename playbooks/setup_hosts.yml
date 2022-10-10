@@ -9,7 +9,7 @@
       ansible.posix.authorized_key:
         user: sadm
         state: present
-        key: "{{ lookup('file', lookup('ansible.builtin.env','HOME') + '/.ssh/id_ed25519.pub') }"
+        key: "{{ lookup('file', lookup('ansible.builtin.env','HOME') + '/.ssh/id_ed25519.pub') }}"
     
     - name: Configure passwordless sudo
       community.general.sudoers:
@@ -29,3 +29,12 @@
       ansible.builtin.apt:
         name: acl
         state: present
+
+    - name: Install python3-pip
+      ansible.builtin.apt:
+        name: python3-pip
+        state: present
+
+    - name: Install hvac python package
+      ansible.builtin.pip:
+        name: hvac

@@ -141,17 +141,31 @@
           - allow_subdomains=true
           - max_ttl=768h
           - key_bits=4096
-    
+
+- name: Install CA's certificate to trust store
+  hosts: all
+  gather_facts: no
+  become: yes
+
+  tasks:
+
     - name: Request Intermediate CA's certificate
-      ansible.builtin.command:
-        argv:
-          - vault
-          - read
-          - -field=certificate
-          - pki_int/cert/ca_chain
+      community.hashi_vault.vault_read:
+        url: "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}"
+        path: pki_int/cert/ca_chain
+        auth_method: token
+        token: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+        validate_certs: no
+        token_validate: false
       register: ca_certificate_output
 
-    - name: Save certificate to disk
+    - name: Write certificate to disk
       ansible.builtin.copy:
-        dest: /home/vault/ca.crt
-        content: "{{ ca_certificate_output.stdout }}"
+        dest: /usr/local/share/ca-certificates/traceit-ca.crt
+        content: "{{ ca_certificate_output }}"
+    
+    - name: Update trust store
+      ansible.builtin.command:
+        argv:
+          - update-ca-certificates
+        
