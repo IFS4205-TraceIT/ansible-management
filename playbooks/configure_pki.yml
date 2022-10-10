@@ -1,4 +1,4 @@
-- name: Generate TLS certificates using Vault
+- name: Configure PKI engine in Vault
   hosts: vault
   gather_facts: no
   become: yes
@@ -13,7 +13,7 @@
 
     - name: Unseal vault
       ansible.builtin.uri:
-        url: "https://127.0.0.1:8200/v1/sys/unseal"
+        url: "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}/v1/sys/unseal"
         method: POST
         body:
           key: "{{ lookup('ansible.builtin.env', 'UNSEAL_KEY') }}"
@@ -77,8 +77,8 @@
           - vault
           - write
           - pki/config/urls
-          - issuing_certificates=https://traceit-07-i.comp.nus.edu.sg/v1/pki/ca
-          - crl_distribution_points=https://traceit-07-i.comp.nus.edu.sg/v1/pki/crl
+          - issuing_certificates={{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}/v1/pki/ca
+          - crl_distribution_points={{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}/v1/pki/crl
     
     - name: Generate Intermediate CA's CSR
       ansible.builtin.command:
@@ -141,34 +141,17 @@
           - allow_subdomains=true
           - max_ttl=768h
           - key_bits=4096
-  
-    - name: Request certificate for traceit-07-i
+    
+    - name: Request Intermediate CA's certificate
       ansible.builtin.command:
         argv:
           - vault
-          - write
-          - -format=json
-          - pki_int/issue/traceit-07-i.comp.nus.edu.sg
-          - common_name=traceit-07-i.comp.nus.edu.sg
-          - ttl=767h
-      register: traceit_07_i_output
-    
-    - name: Update Vault server certificate
-      ansible.builtin.copy:
-        dest: /opt/vault/tls/tls.crt
-        content: "{{ traceit_07_i_output.stdout | from_json | json_query('data.certificate') }}"
-    
-    - name: Update Vault server private key
-      ansible.builtin.copy:
-        dest: /opt/vault/tls/tls.key
-        content: "{{ traceit_07_i_output.stdout | from_json | json_query('data.private_key') }}"
-    
-    - name: Reload Vault without getting sealed
-      ansible.builtin.shell: |
-        kill -SIGHUP $(pidof vault)
-      args:
-        executable: /bin/bash
+          - read
+          - -field=certificate
+          - pki_int/cert/ca_chain
+      register: ca_certificate_output
 
-    - name: Save Intermediate CA's certificate to disk
-      ansible.builtin.shell: |
-        vault read -field=certificate pki_int/cert/ca > /home/vault/ca.crt
+    - name: Save certificate to disk
+      ansible.builtin.copy:
+        dest: /home/vault/ca.crt
+        content: "{{ ca_certificate_output.stdout }}"

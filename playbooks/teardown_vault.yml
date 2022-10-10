@@ -1,7 +1,7 @@
-- name: Teardown Vault from secret hosts
+- name: Teardown Vault
   hosts: vault
   gather_facts: no
-  become: yes # Sudo as root
+  become: yes
 
   tasks:
 
@@ -10,6 +10,11 @@
         name: vault
         enabled: yes
         state: stopped
+
+    - name: Delete CA certificate
+      ansible.builtin.file:
+        path: /home/vault/ca.crt
+        state: absent
 
     - name: Delete vault storage
       ansible.builtin.file:
@@ -30,3 +35,4 @@
       ansible.builtin.apt:
         name: vault
         state: absent
+    

@@ -5,7 +5,6 @@
   become_user: vault
 
   environment:
-    VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
     VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
     VAULT_CACERT: "/home/vault/ca.crt"
 
@@ -14,65 +13,12 @@
     - name: Unseal vault
       ansible.builtin.uri:
         method: POST
-        url: https://traceit-07-i.comp.nus.edu.sg:8200
+        url: "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}/v1/sys/unseal"
         body:
           key: "{{ lookup('ansible.builtin.env', 'UNSEAL_KEY') }}"
         body_format: json
         headers:
           Content-Type: "application/json"
-        validate_certs: no
+        validate_certs: yes
+        ca_path: /home/vault/ca.crt
 
-    - name: Enable TOTP Secrets Engine
-      ansible.builtin.command:
-        argv:
-          - vault
-          - secrets
-          - enable
-          - totp
-      ignore_errors: yes
-
-    - name: Enable Database Secrets Engine
-      ansible.builtin.command:
-        argv:
-          - vault
-          - secrets
-          - enable
-          - database
-      ignore_errors: yes
-    
-    - name: Enable KV Secrets Engine
-      ansible.builtin.command:
-        argv:
-          - vault
-          - secrets
-          - enable
-          - kv
-      ignore_errors: yes
-
-    - name: Enable KV V2 Secrets Engine
-      ansible.builtin.command:
-        argv:
-          - vault
-          - secrets
-          - enable
-          - kv-v2
-      ignore_errors: yes
-    
-    - name: Enable PKI Secrets Engine for Root CA
-      ansible.builtin.command:
-        argv:
-          - vault
-          - secrets
-          - enable
-          - pki
-      ignore_errors: yes
-
-    - name: Enable PKI Secrets Engine for Intermediate CA
-      ansible.builtin.command:
-        argv:
-          - vault
-          - secrets
-          - enable
-          - -path=pki_int
-          - pki
-      ignore_errors: yes

@@ -1,0 +1,38 @@
+- name: Configure Vault to use newly-generated TLS certificate
+  hosts: vault
+  gather_facts: no
+  become: yes
+  become_user: vault
+
+  environment:
+    VAULT_SKIP_VERIFY: true
+    VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+    VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"    
+  
+  tasks:
+    - name: Request certificate for traceit-07-i
+      ansible.builtin.command:
+        argv:
+          - vault
+          - write
+          - -format=json
+          - pki_int/issue/traceit-07-i.comp.nus.edu.sg
+          - common_name=traceit-07-i.comp.nus.edu.sg
+          - ttl=767h
+      register: traceit_07_i_output
+    
+    - name: Update Vault server certificate
+      ansible.builtin.copy:
+        dest: /opt/vault/tls/tls.crt
+        content: "{{ traceit_07_i_output.stdout | from_json | json_query('data.certificate') }}"
+    
+    - name: Update Vault server private key
+      ansible.builtin.copy:
+        dest: /opt/vault/tls/tls.key
+        content: "{{ traceit_07_i_output.stdout | from_json | json_query('data.private_key') }}"
+    
+    - name: Reload Vault without getting sealed
+      ansible.builtin.shell: |
+        kill -SIGHUP $(pidof vault)
+      args:
+        executable: /bin/bash

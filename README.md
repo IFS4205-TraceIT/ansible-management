@@ -104,9 +104,16 @@ Steps:
     * `VAULT_TOKEN_DEV` if you are deploying in the `dev` environment
     * `VAULT_TOKEN_PROD` if you are deploying in the `prod` environment
 
-4) Setup the PKI and update `Vault` to use the newly issued certificate:
+4) Setup the PKI in Vault:
     ```bash
     ansible-playbook \
         -i hosts_prod.yml \
-        playbooks/generate_certificates.yml
+        playbooks/configure_pki.yml
+    ```
+
+5) Configure Vault to use its newly generated certificate:
+   ```bash
+    ansible-playbook \
+        -i hosts_prod.yml \
+        playbooks/certify_vault.yml
     ```

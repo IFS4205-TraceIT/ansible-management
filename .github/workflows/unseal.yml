@@ -71,7 +71,6 @@ jobs:
       - name: Unseal Vault
         uses: dawidd6/action-ansible-playbook@v2
         env:
-          VAULT_TOKEN: ${{ steps.secrets.outputs.vault-token }}
           UNSEAL_KEY: ${{ inputs.unseal_key }}
         with:
           playbook: playbooks/unseal_vault.yml
