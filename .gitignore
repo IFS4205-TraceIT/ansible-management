@@ -1,1 +1,3 @@
 playbooks/files/postgresql_tde.tar.gz
+playbooks/files/tracer-frontend.tar.gz
+playbooks/files/research-frontend.tar.gz

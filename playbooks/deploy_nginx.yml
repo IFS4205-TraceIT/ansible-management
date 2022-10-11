@@ -54,7 +54,11 @@
               proxy_set_header Host traceit-01-i.comp.nus.edu.sg:8000;
               proxy_set_header X-Real-IP $remote_addr;
               proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_pass      http://traceit-01-i.comp.nus.edu.sg:8000;
+              proxy_pass      https://traceit-01-i.comp.nus.edu.sg:8000;
+              proxy_ssl_trusted_certificate /usr/local/share/ca-certificates/traceit-ca.crt;
+              proxy_ssl_verify       on;
+              proxy_ssl_session_reuse on;
+              proxy_ssl_verify_depth  2;
             }
 
             location /research/api {
@@ -62,7 +66,11 @@
               proxy_set_header Host traceit-02-i.comp.nus.edu.sg:8000;
               proxy_set_header X-Real-IP $remote_addr;
               proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_pass      http://traceit-02-i.comp.nus.edu.sg:8000;
+              proxy_pass      https://traceit-02-i.comp.nus.edu.sg:8000;
+              proxy_ssl_trusted_certificate /usr/local/share/ca-certificates/traceit-ca.crt;
+              proxy_ssl_verify       on;
+              proxy_ssl_session_reuse on;
+              proxy_ssl_verify_depth  2;
             }
 
             location /contact/api {
@@ -70,7 +78,11 @@
               proxy_set_header Host traceit-03-i.comp.nus.edu.sg:8000;
               proxy_set_header X-Real-IP $remote_addr;
               proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_pass      http://traceit-03-i.comp.nus.edu.sg:8000;
+              proxy_pass      https://traceit-03-i.comp.nus.edu.sg:8000;
+              proxy_ssl_trusted_certificate /usr/local/share/ca-certificates/traceit-ca.crt;
+              proxy_ssl_verify       on;
+              proxy_ssl_session_reuse on;
+              proxy_ssl_verify_depth  2;
             }
 
             location /tracer {  
