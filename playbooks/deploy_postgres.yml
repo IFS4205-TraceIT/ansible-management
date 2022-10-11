@@ -90,7 +90,7 @@
         data:
           common_name: "{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}"
           ttl: 767h
-        register: server_certificate_output
+      register: server_certificate_output
 
     - name: Add server certificate
       become: yes
