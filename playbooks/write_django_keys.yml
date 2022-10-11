@@ -1,17 +1,16 @@
 - name: Write django secrets to Vault
   hosts: vault
   gather_facts: no
+  become: yes
+  become_user: vault
 
   environment:
     VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
     VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
-    VAULT_CACERT: "/home/vault/ca.crt"
 
   tasks:
 
     - name: Write Django secrets
-      become: yes
-      become_user: vault
       ansible.builtin.command:
         argv:
           - vault
