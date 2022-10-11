@@ -150,7 +150,7 @@
 
   environment:
     VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
-    VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
+    VAULT_ADDR: "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}"
 
   tasks:
 
@@ -161,14 +161,12 @@
           - write
           - database/config/{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}
           - plugin_name=postgresql-database-plugin
-          - connection_url=postgresql://{{ '{{username}}' }}:{{ '{{password}}' }}@{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}:5432/postgres?sslmode=verify-ca&sslrootcert=
+          - connection_url=postgresql://{{ '{{username}}' }}:{{ '{{password}}' }}@{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}:5432/postgres?sslmode=verify-ca&sslrootcert=/usr/local/share/ca-certificates/traceit-ca.crt
           - allowed_roles=*
           - username=postgres
           - password={{ lookup('ansible.builtin.env', 'POSTGRES_ROOT_PASSWORD') }}
 
     - name: Define creation SQL query
-      become: yes
-      become_user: vault
       ansible.builtin.copy:
         dest: /home/vault/root.sql
         owner: vault
@@ -179,8 +177,6 @@
           GRANT postgres TO "{{ '{{name}}' }}";
     
     - name: Create role
-      become: yes
-      become_user: vault
       ansible.builtin.command:
         argv:
           - vault
