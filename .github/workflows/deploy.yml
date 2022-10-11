@@ -103,6 +103,7 @@ jobs:
           TDE_KEY:                "${{ steps.database1-secrets.outputs.TDE_KEY }}"
           POSTGRES_ROOT_PASSWORD: "${{ steps.database1-secrets.outputs.POSTGRES_ROOT_PASSWORD }}"
           VAULT_TOKEN:            "${{ steps.secrets.outputs.vault-token }}"
+          VAULT_ADDR:              https://traceit-07-i.comp.nus.edu.sg:8200
         with:
           playbook: playbooks/deploy_postgres.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -190,6 +191,7 @@ jobs:
           APP_NAME: tracer_backend
           DJANGO_SECRET_KEY: "${{ steps.tracer_backend-secrets.outputs.DJANGO_SECRET_KEY }}"
           VAULT_TOKEN: ${{ steps.secrets.outputs.vault-token }}
+          VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
           POSTGRES_HOST: traceit-01-i.comp.nus.edu.sg
           POSTGRES_DB: postgres
           POSTGRES_USER: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_USER }}"
@@ -209,6 +211,7 @@ jobs:
           APP_NAME: research_backend
           DJANGO_SECRET_KEY: "${{ steps.research_backend-secrets.outputs.DJANGO_SECRET_KEY }}"
           VAULT_TOKEN: ${{ steps.secrets.outputs.vault-token }}
+          VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
           POSTGRES_HOST: traceit-01-i.comp.nus.edu.sg
           POSTGRES_DB: postgres
           # POSTGRES_USER: "${{ steps.research_backend-secrets.outputs.POSTGRES_USER }}"
