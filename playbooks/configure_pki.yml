@@ -7,13 +7,13 @@
   environment:
     VAULT_SKIP_VERIFY: true
     VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
-    VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
+    VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"    
 
   tasks:
 
     - name: Unseal vault
       ansible.builtin.uri:
-        url: "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}/v1/sys/unseal"
+        url: "https://traceit-07-i.comp.nus.edu.sg:8200/v1/sys/unseal"
         method: POST
         body:
           key: "{{ lookup('ansible.builtin.env', 'UNSEAL_KEY') }}"
@@ -77,8 +77,8 @@
           - vault
           - write
           - pki/config/urls
-          - issuing_certificates={{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}/v1/pki/ca
-          - crl_distribution_points={{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}/v1/pki/crl
+          - issuing_certificates=https://traceit-07-i.comp.nus.edu.sg:8200/v1/pki/ca
+          - crl_distribution_points=https://traceit-07-i.comp.nus.edu.sg:8200/v1/pki/crl
     
     - name: Generate Intermediate CA's CSR
       ansible.builtin.command:
@@ -151,7 +151,7 @@
 
     - name: Request Intermediate CA's certificate
       community.hashi_vault.vault_read:
-        url: "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}"
+        url: "https://traceit-07-i.comp.nus.edu.sg:8200"
         path: pki_int/cert/ca_chain
         auth_method: token
         token: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
