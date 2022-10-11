@@ -6,7 +6,7 @@
 
   environment:
     VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
-    VAULT_ADDR: "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}"
+    VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"    
 
   tasks:
 

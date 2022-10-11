@@ -77,48 +77,48 @@
         mode: 0600
         content: "{{ server_certificate_output.data.data.private_key }}"
 
-    # - name: Perform database migrations
-    #   become: yes
-    #   become_user: django
-    #   args:
-    #     chdir: /home/django/repo
-    #   ansible.builtin.shell: |
-    #     export PATH=/home/django/.local/bin:$PATH
-    #     poetry run python manage.py migrate
-    #   environment:
-    #     # Django
-    #     DJANGO_SECRET_KEY: "{{ lookup('ansible.builtin.env', 'DJANGO_SECRET_KEY') }}"
-    #     DJANGO_DEBUG: True
-    #     # Vault
-    #     VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
-    #     VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
-    #     # PostgreSQL
-    #     POSTGRES_HOST: "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
-    #     POSTGRES_PORT: 5432
-    #     POSTGRES_DB: "{{ lookup('ansible.builtin.env', 'POSTGRES_DB') }}"
-    #     POSTGRES_USER: "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
-    #     POSTGRES_PASSWORD: "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
-    #   register: migrations
-    # - debug: msg={{ migrations.stdout_lines }}
+    - name: Perform database migrations
+      become: yes
+      become_user: django
+      args:
+        chdir: /home/django/repo
+      ansible.builtin.shell: |
+        export PATH=/home/django/.local/bin:$PATH
+        poetry run python manage.py migrate
+      environment:
+        # Django
+        DJANGO_SECRET_KEY: "{{ lookup('ansible.builtin.env', 'DJANGO_SECRET_KEY') }}"
+        DJANGO_DEBUG: True
+        # Vault
+        VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
+        VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+        # PostgreSQL
+        POSTGRES_HOST: "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
+        POSTGRES_PORT: 5432
+        POSTGRES_DB: "{{ lookup('ansible.builtin.env', 'POSTGRES_DB') }}"
+        POSTGRES_USER: "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
+        POSTGRES_PASSWORD: "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
+      register: migrations
+    - debug: msg={{ migrations.stdout_lines }}
 
-    # - name: Run gunicorn in daemon mode
-    #   become: yes
-    #   become_user: django
-    #   args:
-    #     chdir: /home/django/repo
-    #   ansible.builtin.shell: |
-    #     export PATH=/home/django/.local/bin:$PATH
-    #     poetry run gunicorn -w 5 --bind 0.0.0.0:8000 {{ lookup('ansible.builtin.env', 'APP_NAME') }}.wsgi:application --daemon --pid {{ lookup('ansible.builtin.env', 'APP_NAME') }}.pid --certfile=server.crt --keyfile=server.key
-    #   environment:
-    #     # Django
-    #     DJANGO_SECRET_KEY: "{{ lookup('ansible.builtin.env', 'DJANGO_SECRET_KEY') }}"
-    #     DJANGO_DEBUG: True
-    #     # Vault
-    #     VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
-    #     VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
-    #     # PostgreSQL
-    #     POSTGRES_HOST: "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
-    #     POSTGRES_PORT: 5432
-    #     POSTGRES_DB: "{{ lookup('ansible.builtin.env', 'POSTGRES_DB') }}"
-    #     POSTGRES_USER: "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
-    #     POSTGRES_PASSWORD: "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
+    - name: Run gunicorn in daemon mode
+      become: yes
+      become_user: django
+      args:
+        chdir: /home/django/repo
+      ansible.builtin.shell: |
+        export PATH=/home/django/.local/bin:$PATH
+        poetry run gunicorn -w 5 --bind 0.0.0.0:8000 {{ lookup('ansible.builtin.env', 'APP_NAME') }}.wsgi:application --daemon --pid {{ lookup('ansible.builtin.env', 'APP_NAME') }}.pid --certfile=server.crt --keyfile=server.key
+      environment:
+        # Django
+        DJANGO_SECRET_KEY: "{{ lookup('ansible.builtin.env', 'DJANGO_SECRET_KEY') }}"
+        DJANGO_DEBUG: True
+        # Vault
+        VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
+        VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+        # PostgreSQL
+        POSTGRES_HOST: "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
+        POSTGRES_PORT: 5432
+        POSTGRES_DB: "{{ lookup('ansible.builtin.env', 'POSTGRES_DB') }}"
+        POSTGRES_USER: "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
+        POSTGRES_PASSWORD: "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"

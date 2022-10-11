@@ -11,11 +11,6 @@
         enabled: yes
         state: stopped
 
-    - name: Delete CA certificate
-      ansible.builtin.file:
-        path: /home/vault/ca.crt
-        state: absent
-
     - name: Delete vault storage
       ansible.builtin.file:
         path: /opt/vault/data
