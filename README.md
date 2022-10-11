@@ -89,6 +89,8 @@ Steps:
 
 ### The `Vault` server
 
+> Ensure the previous instance of `Vault` (if any) has been uninstalled.
+
 Steps:
 
 1) Deploy `Vault` to the server:
