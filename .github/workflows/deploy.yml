@@ -227,29 +227,29 @@ jobs:
           options: |
             --inventory hosts_prod.yml
 
-      - name: Deploy contact_backend
-        uses: dawidd6/action-ansible-playbook@v2
-        env:
-          APP_HOSTS: traceit-03-i.comp.nus.edu.sg
-          PAT: ${{ secrets.PAT }}
-          REPOSITORY: "IFS4205-TraceIT/contact-backend"
-          APP_NAME: contact_backend
-          DJANGO_SECRET_KEY: "${{ steps.contact_backend-secrets.outputs.DJANGO_SECRET_KEY }}"
-          VAULT_TOKEN: ${{ steps.secrets.outputs.vault-token }}
-          VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
-          POSTGRES_HOST: traceit-01-i.comp.nus.edu.sg
-          POSTGRES_DB: postgres
-          # POSTGRES_USER: "${{ steps.contact_backend-secrets.outputs.POSTGRES_USER }}"
-          # POSTGRES_PASSWORD: "${{ steps.contact_backend-secrets.outputs.POSTGRES_PASSWORD }}"
+      # - name: Deploy contact_backend
+      #   uses: dawidd6/action-ansible-playbook@v2
+      #   env:
+      #     APP_HOSTS: traceit-03-i.comp.nus.edu.sg
+      #     PAT: ${{ secrets.PAT }}
+      #     REPOSITORY: "IFS4205-TraceIT/contact-backend"
+      #     APP_NAME: contact_backend
+      #     DJANGO_SECRET_KEY: "${{ steps.contact_backend-secrets.outputs.DJANGO_SECRET_KEY }}"
+      #     VAULT_TOKEN: ${{ steps.secrets.outputs.vault-token }}
+      #     VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
+      #     POSTGRES_HOST: traceit-01-i.comp.nus.edu.sg
+      #     POSTGRES_DB: postgres
+      #     # POSTGRES_USER: "${{ steps.contact_backend-secrets.outputs.POSTGRES_USER }}"
+      #     # POSTGRES_PASSWORD: "${{ steps.contact_backend-secrets.outputs.POSTGRES_PASSWORD }}"
           
-          # Temporarily share credentials with tracer_backend
-          POSTGRES_USER: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_USER }}"
-          POSTGRES_PASSWORD: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_PASSWORD }}"
-        with:
-          playbook: playbooks/deploy_django.yml
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          options: |
-            --inventory hosts_prod.yml
+      #     # Temporarily share credentials with tracer_backend
+      #     POSTGRES_USER: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_USER }}"
+      #     POSTGRES_PASSWORD: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_PASSWORD }}"
+      #   with:
+      #     playbook: playbooks/deploy_django.yml
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     options: |
+      #       --inventory hosts_prod.yml
 
       - name: Download tracer_frontend release
         uses: dsaltares/fetch-gh-release-asset@master
