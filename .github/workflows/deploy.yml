@@ -235,6 +235,7 @@ jobs:
           APP_NAME: contact_backend
           DJANGO_SECRET_KEY: "${{ steps.contact_backend-secrets.outputs.DJANGO_SECRET_KEY }}"
           VAULT_TOKEN: ${{ steps.secrets.outputs.vault-token }}
+          VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
           POSTGRES_HOST: traceit-01-i.comp.nus.edu.sg
           POSTGRES_DB: postgres
           # POSTGRES_USER: "${{ steps.contact_backend-secrets.outputs.POSTGRES_USER }}"
