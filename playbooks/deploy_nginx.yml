@@ -15,6 +15,35 @@
         name: nginx
         state: present
 
+    - name: Request new server certificate
+      community.hashi_vault.vault_write:
+        url: "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}"
+        path: pki_int/issue/traceit-04-i.comp.nus.edu.sg
+        auth_method: token
+        token: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+        validate_certs: yes
+        token_validate: false
+        data:
+          common_name: traceit-04-i.comp.nus.edu.sg
+          ttl: 767h
+      register: server_certificate_output
+
+    - name: Add server certificate
+      ansible.builtin.copy:
+        dest: /etc/nginx/server.crt
+        owner: root
+        group: root
+        mode: 0400
+        content: "{{ server_certificate_output.data.data.certificate }}"
+
+    - name: Add server private key
+      ansible.builtin.copy:
+        dest: /etc/nginx/server.key
+        owner: root
+        group: root
+        mode: 0400
+        content: "{{ server_certificate_output.data.data.private_key }}"
+
     - name: Create /tracer web directory
       ansible.builtin.file:
         state: directory
@@ -59,6 +88,8 @@
               proxy_ssl_verify       on;
               proxy_ssl_session_reuse on;
               proxy_ssl_verify_depth  2;
+              proxy_ssl_certificate     /etc/nginx/server.crt;
+              proxy_ssl_certificate_key /etc/nginx/server.key;
             }
 
             location /research/api {
@@ -71,6 +102,8 @@
               proxy_ssl_verify       on;
               proxy_ssl_session_reuse on;
               proxy_ssl_verify_depth  2;
+              proxy_ssl_certificate     /etc/nginx/server.crt;
+              proxy_ssl_certificate_key /etc/nginx/server.key;
             }
 
             location /contact/api {
@@ -83,6 +116,8 @@
               proxy_ssl_verify       on;
               proxy_ssl_session_reuse on;
               proxy_ssl_verify_depth  2;
+              proxy_ssl_certificate     /etc/nginx/server.crt;
+              proxy_ssl_certificate_key /etc/nginx/server.key;
             }
 
             location /tracer {  

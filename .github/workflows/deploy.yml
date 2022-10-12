@@ -276,3 +276,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
             --inventory hosts_prod.yml
+        env:
+          VAULT_TOKEN: ${{ steps.secrets.outputs.vault-token }}
+          VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
