@@ -5,6 +5,11 @@
 
   tasks:
 
+    - name: Stop NGINX
+      ansible.builtin.systemd:
+        name: nginx.service
+        state: stopped
+
     - name: Remove /tracer web directory
       ansible.builtin.file:
         state: absent
@@ -15,7 +20,10 @@
         state: absent
         path: /var/www/research
 
-    - name: Stop NGINX
-      ansible.builtin.systemd:
-        name: nginx.service
-        state: stopped
+    - name: Remove cert
+      ansible.builtin.file:
+        state: absent
+        path: "{{ item }}"
+      loop:
+        - /etc/nginx/server.key
+        - /etc/nginx/server.crt
