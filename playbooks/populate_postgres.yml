@@ -52,7 +52,9 @@
         chdir: /home/django/repo
       ansible.builtin.shell: |
         export PATH=/home/django/.local/bin:$PATH
-        poetry run python manage.py migrate --fake
+        poetry run python manage.py migrate researchs --database researchs_db
+        poetry run python manage.py migrate main --database main_db
+        poetry run python manage.py migrate
       environment:
         # PostgreSQL
         POSTGRES_AUTH_HOST:         "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
@@ -60,18 +62,28 @@
         POSTGRES_AUTH_DB:           authdb
         POSTGRES_AUTH_USER:         "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
         POSTGRES_AUTH_PASSWORD:     "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
+        POSTGRES_AUTH_SSL_ROOT_CERT:     /usr/local/share/ca-certificates/traceit-ca.crt
+        POSTGRES_AUTH_SSL_CERT:          /home/django/repo/server.crt
+        POSTGRES_AUTH_SSL_KEY:           /home/django/repo/server.key
 
         POSTGRES_HOST:              "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
         POSTGRES_PORT:              "{{ lookup('ansible.builtin.env', 'POSTGRES_PORT') }}"
         POSTGRES_DB:                maindb
         POSTGRES_USER:              "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
         POSTGRES_PASSWORD:          "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
+        POSTGRES_SSL_ROOT_CERT:          /usr/local/share/ca-certificates/traceit-ca.crt
+        POSTGRES_SSL_CERT:               /home/django/repo/server.crt
+        POSTGRES_SSL_KEY:                /home/django/repo/server.key
+
 
         POSTGRES_RESEARCH_HOST:     "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
         POSTGRES_RESEARCH_PORT:     "{{ lookup('ansible.builtin.env', 'POSTGRES_PORT') }}"
         POSTGRES_RESEARCH_DB:       researchsdb
         POSTGRES_RESEARCH_USER:     "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
         POSTGRES_RESEARCH_PASSWORD: "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
+        POSTGRES_RESEARCH_SSL_ROOT_CERT: /usr/local/share/ca-certificates/traceit-ca.crt
+        POSTGRES_RESEARCH_SSL_CERT:      /home/django/repo/server.crt
+        POSTGRES_RESEARCH_SSL_KEY:       /home/django/repo/server.key
       register: migrations
     - debug: msg={{ migrations.stdout_lines }}
     
