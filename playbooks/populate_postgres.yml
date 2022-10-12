@@ -1,0 +1,84 @@
+- name: Perform migrations to PostgreSQL using Django manage.py
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  become: yes # Sudo as root
+
+  tasks:
+
+    - name: Create django user
+      ansible.builtin.user:
+        name: django
+        shell: /bin/false # Don't allow login
+
+    - name: Add Python Repository
+      ansible.builtin.apt_repository:
+        repo: ppa:deadsnakes/ppa
+
+    - name: Update to Python 3.10
+      ansible.builtin.apt:
+        name: python3.10
+
+    - name: Install poetry
+      become: yes
+      become_user: django
+      ansible.builtin.shell:
+        cmd: curl -sSL https://install.python-poetry.org | python3.10 -
+      args:
+        creates: /home/django/.local/bin/poetry
+
+    - name: Checkout repository
+      become: yes
+      become_user: django
+      ansible.builtin.git:
+        repo: "https://{{ lookup('ansible.builtin.env', 'PAT') }}@github.com/IFS4205-TraceIT/database-configurations"
+        dest: /home/django/repo
+
+    - name: Install dependencies
+      become: yes
+      become_user: django
+      args:
+        chdir: /home/django/repo
+      ansible.builtin.shell: |
+        export PATH=/home/django/.local/bin:$PATH
+        poetry config --local virtualenvs.options.no-setuptools true
+        poetry config --local virtualenvs.options.no-pip true
+        poetry install --no-interaction
+
+    - name: Perform database migrations
+      become: yes
+      become_user: django
+      args:
+        chdir: /home/django/repo
+      ansible.builtin.shell: |
+        export PATH=/home/django/.local/bin:$PATH
+        poetry run python manage.py migrate --fake
+      environment:
+        # PostgreSQL
+        POSTGRES_AUTH_HOST:         "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
+        POSTGRES_AUTH_PORT:         "{{ lookup('ansible.builtin.env', 'POSTGRES_PORT') }}"
+        POSTGRES_AUTH_DB:           authdb
+        POSTGRES_AUTH_USER:         "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
+        POSTGRES_AUTH_PASSWORD:     "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
+
+        POSTGRES_HOST:              "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
+        POSTGRES_PORT:              "{{ lookup('ansible.builtin.env', 'POSTGRES_PORT') }}"
+        POSTGRES_DB:                maindb
+        POSTGRES_USER:              "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
+        POSTGRES_PASSWORD:          "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
+
+        POSTGRES_RESEARCH_HOST:     "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
+        POSTGRES_RESEARCH_PORT:     "{{ lookup('ansible.builtin.env', 'POSTGRES_PORT') }}"
+        POSTGRES_RESEARCH_DB:       researchsdb
+        POSTGRES_RESEARCH_USER:     "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
+        POSTGRES_RESEARCH_PASSWORD: "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
+      register: migrations
+    - debug: msg={{ migrations.stdout_lines }}
+    
+    - name: Cleanup django user and files
+      become: yes
+      ansible.builtin.command:
+        argv:
+          - deluser
+          - --remove-home
+          - django

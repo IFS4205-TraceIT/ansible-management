@@ -77,30 +77,6 @@
         mode: 0600
         content: "{{ server_certificate_output.data.data.private_key }}"
 
-    - name: Perform database migrations
-      become: yes
-      become_user: django
-      args:
-        chdir: /home/django/repo
-      ansible.builtin.shell: |
-        export PATH=/home/django/.local/bin:$PATH
-        poetry run python manage.py migrate --fake
-      environment:
-        # Django
-        DJANGO_SECRET_KEY: "{{ lookup('ansible.builtin.env', 'DJANGO_SECRET_KEY') }}"
-        DJANGO_DEBUG: True
-        # Vault
-        VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
-        VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
-        # PostgreSQL
-        POSTGRES_HOST: "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
-        POSTGRES_PORT: 5432
-        POSTGRES_DB: "{{ lookup('ansible.builtin.env', 'POSTGRES_DB') }}"
-        POSTGRES_USER: "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
-        POSTGRES_PASSWORD: "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
-      register: migrations
-    - debug: msg={{ migrations.stdout_lines }}
-
     - name: Run gunicorn in daemon mode
       become: yes
       become_user: django
@@ -114,11 +90,38 @@
         DJANGO_SECRET_KEY: "{{ lookup('ansible.builtin.env', 'DJANGO_SECRET_KEY') }}"
         DJANGO_DEBUG: True
         # Vault
-        VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
+        VAULT_ADDR: "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}"
         VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+        VAULT_ROOT_CA_FILE: /usr/local/share/ca-certificates/traceit-ca.crt
+        VAULT_CLIENT_CERT_FILE: /home/django/repo/server.crt
+        VAULT_CLIENT_KEY_FILE: /home/django/repo/server.key
         # PostgreSQL
-        POSTGRES_HOST: "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
-        POSTGRES_PORT: 5432
-        POSTGRES_DB: "{{ lookup('ansible.builtin.env', 'POSTGRES_DB') }}"
-        POSTGRES_USER: "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
-        POSTGRES_PASSWORD: "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
+        POSTGRES_AUTH_HOST:              "{{ lookup('ansible.builtin.env', 'POSTGRES_AUTH_HOST') }}"
+        POSTGRES_AUTH_PORT:              "{{ lookup('ansible.builtin.env', 'POSTGRES_AUTH_PORT') }}"
+        POSTGRES_AUTH_DB:                "{{ lookup('ansible.builtin.env', 'POSTGRES_AUTH_DB') }}"
+        POSTGRES_AUTH_USER:              "{{ lookup('ansible.builtin.env', 'POSTGRES_AUTH_USER') }}"
+        POSTGRES_AUTH_PASSWORD:          "{{ lookup('ansible.builtin.env', 'POSTGRES_AUTH_PASSWORD') }}"
+        POSTGRES_AUTH_SSL_ROOT_CERT:     /usr/local/share/ca-certificates/traceit-ca.crt
+        POSTGRES_AUTH_SSL_CERT:          /home/django/repo/server.crt
+        POSTGRES_AUTH_SSL_KEY:           /home/django/repo/server.key
+
+        POSTGRES_HOST:                   "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
+        POSTGRES_PORT:                   "{{ lookup('ansible.builtin.env', 'POSTGRES_PORT') }}"
+        POSTGRES_DB:                     "{{ lookup('ansible.builtin.env', 'POSTGRES_DB') }}"
+        POSTGRES_USER:                   "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
+        POSTGRES_PASSWORD:               "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
+        POSTGRES_SSL_ROOT_CERT:          /usr/local/share/ca-certificates/traceit-ca.crt
+        POSTGRES_SSL_CERT:               /home/django/repo/server.crt
+        POSTGRES_SSL_KEY:                /home/django/repo/server.key
+
+        POSTGRES_RESEARCH_HOST:          "{{ lookup('ansible.builtin.env', 'POSTGRES_RESEARCH_HOST') }}"
+        POSTGRES_RESEARCH_PORT:          "{{ lookup('ansible.builtin.env', 'POSTGRES_RESEARCH_PORT') }}"
+        POSTGRES_RESEARCH_DB:            "{{ lookup('ansible.builtin.env', 'POSTGRES_RESEARCH_DB') }}"
+        POSTGRES_RESEARCH_USER:          "{{ lookup('ansible.builtin.env', 'POSTGRES_RESEARCH_USER') }}"
+        POSTGRES_RESEARCH_PASSWORD:      "{{ lookup('ansible.builtin.env', 'POSTGRES_RESEARCH_PASSWORD') }}"
+        POSTGRES_RESEARCH_SSL_ROOT_CERT: /usr/local/share/ca-certificates/traceit-ca.crt
+        POSTGRES_RESEARCH_SSL_CERT:      /home/django/repo/server.crt
+        POSTGRES_RESEARCH_SSL_KEY:       /home/django/repo/server.key
+
+
+        

@@ -128,6 +128,37 @@
       environment:
         LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib
         ENCRYPTION_KEY: "{{ lookup('ansible.builtin.env', 'TDE_KEY') }}"
+    
+    - name: Create databases and database roles
+      become: yes
+      become_user: postgres
+      args:
+        chdir: /home/postgres/postgresql_tde/bin
+      ansible.builtin.command:
+        argv:
+          - ./psql
+          - -c  
+          - "{{ item }}"
+
+      environment:
+        LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib  
+      loop:
+        - CREATE DATABASE authdb;
+        - CREATE DATABASE researchsdb;
+        - CREATE DATABASE maindb;
+
+        - CREATE role authdb_readwrite;
+        - CREATE role researchsdb_readwrite;
+        - CREATE role maindb_readwrite;
+
+        - REVOKE CONNECT ON DATABASE authdb FROM PUBLIC;
+        - GRANT CONNECT ON DATABASE authdb TO authdb_readwrite;
+
+        - REVOKE CONNECT ON DATABASE researchsdb FROM PUBLIC;
+        - GRANT CONNECT ON DATABASE researchsdb TO researchsdb_readwrite;
+
+        - REVOKE CONNECT ON DATABASE maindb FROM PUBLIC;
+        - GRANT CONNECT ON DATABASE maindb TO maindb_readwrite;
 
     - name: Set password for root user
       become: yes
@@ -137,10 +168,10 @@
       ansible.builtin.command:
         argv:
           - ./psql
-          - -c  
+          - -c
           - ALTER USER postgres PASSWORD '{{ lookup("ansible.builtin.env", "POSTGRES_ROOT_PASSWORD") }}';
       environment:
-        LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib  
+        LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib
 
 - name: Configure dynamic secrets for PostgreSQL
   hosts: vault
@@ -166,21 +197,38 @@
           - username=postgres
           - password={{ lookup('ansible.builtin.env', 'POSTGRES_ROOT_PASSWORD') }}
 
-    - name: Define creation SQL query
+    - name: Define user creation queries
       ansible.builtin.copy:
-        dest: /home/vault/root.sql
+        dest: "/home/vault/{{ item }}.sql"
         owner: vault
         group: vault
-        mode: 0700
+        mode: 0400
         content: |
           CREATE ROLE "{{ '{{name}}' }}" WITH LOGIN PASSWORD '{{ '{{password}}' }}' VALID UNTIL '{{ '{{expiration}}' }}' INHERIT;
-          GRANT postgres TO "{{ '{{name}}' }}";
+          GRANT {{ item }} TO "{{ '{{name}}' }}";
+      loop:
+        - authdb_readwrite
+        - researchsdb_readwrite
+        - maindb_readwrite
     
-    - name: Create role
+    - name: Create roles in Vault
       ansible.builtin.command:
         argv:
           - vault
           - write
-          - database/roles/root
+          - database/roles/{{ item }}
           - db_name={{ lookup('ansible.builtin.env', 'DB_HOSTS') }}
-          - creation_statements=@/home/vault/root.sql
+          - creation_statements=@/home/vault/{{ item }}.sql
+      loop:
+        - authdb_readwrite
+        - researchsdb_readwrite
+        - maindb_readwrite
+
+    - name: Delete user creation queries
+      ansible.builtin.file:
+        path: "/home/vault/{{ item }}.sql"
+        state: absent
+      loop:
+        - authdb_readwrite
+        - researchsdb_readwrite
+        - maindb_readwrite
