@@ -161,7 +161,7 @@
           - write
           - database/config/{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}
           - plugin_name=postgresql-database-plugin
-          - connection_url=postgresql://{{ '{{username}}' }}:{{ '{{password}}' }}@{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}:5432/postgres?sslmode=verify-ca&sslrootcert=/usr/local/share/ca-certificates/traceit-ca.crt
+          - connection_url=postgresql://{{ '{{username}}' }}:{{ '{{password}}' }}@{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}:5432/postgres?sslmode=verify-ca&sslrootcert=/usr/local/share/ca-certificates/traceit-ca.crt&sslcert=/opt/vault/tls/tls.crt&sslkey=/opt/vault/tls/tls.key
           - allowed_roles=*
           - username=postgres
           - password={{ lookup('ansible.builtin.env', 'POSTGRES_ROOT_PASSWORD') }}
