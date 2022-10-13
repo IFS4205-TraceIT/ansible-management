@@ -5,6 +5,11 @@
 
   tasks:
 
+    - name: Clear previous files
+      ansible.builtin.file:
+        path: /home/django
+        state: absent
+
     - name: Create django user
       ansible.builtin.user:
         name: django
@@ -85,11 +90,4 @@
         POSTGRES_RESEARCH_SSL_KEY:       /home/django/repo/server.key
       register: migrations
     - debug: msg={{ migrations.stdout_lines }}
-    
-    - name: Cleanup django user and files
-      become: yes
-      ansible.builtin.command:
-        argv:
-          - deluser
-          - --remove-home
-          - django
+
