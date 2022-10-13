@@ -19,4 +19,4 @@
           - -mount=kv
           - "{{ lookup('ansible.builtin.env', 'APP_NAME') }}"
           - secret_key={{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,ascii_uppercase,digits length=50') }}
-      no_log: true
+
