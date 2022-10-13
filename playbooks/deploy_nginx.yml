@@ -76,7 +76,9 @@
         dest: /etc/nginx/sites-available/default
         content: |
           server { 
-            listen       80;
+            listen       443 ssl;
+            ssl_certificate     /etc/nginx/server.crt;
+            ssl_certificate_key /etc/nginx/server.key;
 
             location /tracer/api {
               rewrite ^/tracer/api(.*) $1 break;
