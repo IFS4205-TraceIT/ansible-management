@@ -61,8 +61,10 @@ jobs:
         run: |
           if [[ "${{ inputs.deploy_environment }}" == "prod" ]]; then
             echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_PROD }}'
+            # echo '::set-output name=vault-cacert::${{ secrets.VAULT_CA_CERT_PROD }}'
           else
             echo '::set-output name=vault-token::${{ secrets.VAULT_TOKEN_DEV }}'
+            # echo '::set-output name=vault-cacert::${{ secrets.VAULT_CA_CERT_DEV }}'
           fi
 
       - name: Generate database secrets for Database 1
@@ -86,6 +88,8 @@ jobs:
               kv/database1 tde_key | TDE_KEY;
               kv/database1 root_password | POSTGRES_ROOT_PASSWORD;
           exportEnv: false
+          # caCertificate: ${{ steps.secrets.outputs.vault-cacert }}
+          tlsSkipVerify: true
 
       - name: Download PostgreSQL TDE release
         uses: dsaltares/fetch-gh-release-asset@master
@@ -170,6 +174,8 @@ jobs:
               database/creds/maindb_readwrite username | POSTGRES_USER;
               database/creds/maindb_readwrite password | POSTGRES_PASSWORD;
           exportEnv: false
+          # caCertificate: ${{ steps.secrets.outputs.vault-cacert }}
+          tlsSkipVerify: true
 
       - name: Get research_backend secrets from Vault
         uses: hashicorp/vault-action@v2.4.0
@@ -184,6 +190,8 @@ jobs:
               database/creds/researchsdb_readwrite username | POSTGRES_RESEARCH_USER;
               database/creds/researchsdb_readwrite password | POSTGRES_RESEARCH_PASSWORD;
           exportEnv: false
+          # caCertificate: ${{ steps.secrets.outputs.vault-cacert }}
+          tlsSkipVerify: true
       
       - name: Get contact_backend secrets from Vault
         uses: hashicorp/vault-action@v2.4.0
@@ -198,6 +206,8 @@ jobs:
               database/creds/maindb_readwrite username | POSTGRES_USER;
               database/creds/maindb_readwrite password | POSTGRES_PASSWORD;
           exportEnv: false
+          # caCertificate: ${{ steps.secrets.outputs.vault-cacert }}
+          tlsSkipVerify: true
 
       - name: Deploy tracer_backend
         uses: dawidd6/action-ansible-playbook@v2
