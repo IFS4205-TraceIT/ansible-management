@@ -1,6 +1,5 @@
 - name: Perform migrations to PostgreSQL using Django manage.py
-  hosts: localhost
-  connection: local
+  hosts: cicd
   gather_facts: no
   become: yes # Sudo as root
 
