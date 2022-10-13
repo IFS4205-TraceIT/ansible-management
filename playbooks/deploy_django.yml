@@ -84,7 +84,7 @@
         chdir: /home/django/repo
       ansible.builtin.shell: |
         export PATH=/home/django/.local/bin:$PATH
-        poetry run gunicorn -w 5 --bind 0.0.0.0:8000 {{ lookup('ansible.builtin.env', 'APP_NAME') }}.wsgi:application --daemon --pid {{ lookup('ansible.builtin.env', 'APP_NAME') }}.pid --certfile=server.crt --keyfile=server.key --ca_certs=/usr/local/share/ca-certificates/traceit-ca.crt --cert_reqs=2 --do_handshake_on_connect=true
+        poetry run gunicorn -w 5 --bind 0.0.0.0:8000 {{ lookup('ansible.builtin.env', 'APP_NAME') }}.wsgi:application --daemon --pid {{ lookup('ansible.builtin.env', 'APP_NAME') }}.pid --certfile=server.crt --keyfile=server.key --ca-certs=/usr/local/share/ca-certificates/traceit-ca.crt --cert-reqs=2 --do-handshake-on-connect=true
       environment:
         # Django
         DJANGO_SECRET_KEY: "{{ lookup('ansible.builtin.env', 'DJANGO_SECRET_KEY') }}"
