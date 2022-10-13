@@ -17,4 +17,5 @@
           Content-Type: "application/json"
         validate_certs: yes
         ca_path: /usr/local/share/ca-certificates/traceit-ca.crt
-
+        client_cert: /opt/vault/tls/tls.crt
+        client_key: /opt/vault/tls/tls.key
