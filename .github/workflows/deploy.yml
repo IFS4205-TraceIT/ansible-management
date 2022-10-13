@@ -114,7 +114,7 @@ jobs:
         uses: dawidd6/action-ansible-playbook@v2
         env:
           POSTGRES_HOST: traceit-01-i.comp.nus.edu.sg
-          POSTGRES_USER: 5432
+          POSTGRES_PORT: 5432
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: "${{ steps.database1-secrets.outputs.POSTGRES_ROOT_PASSWORD }}"
           PAT: ${{ secrets.PAT }}
