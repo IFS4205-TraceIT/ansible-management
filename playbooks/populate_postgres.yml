@@ -74,7 +74,7 @@
         chdir: /home/django/repo
       ansible.builtin.shell: |
         export PATH=/home/django/.local/bin:$PATH
-        poetry config --local virtualenvs.options.no-setuptools true
+        poetry config --local virtualenvs.options.no-setuptools false
         poetry config --local virtualenvs.options.no-pip true
         poetry install --no-interaction
 
@@ -107,7 +107,6 @@
         POSTGRES_SSL_ROOT_CERT:          /usr/local/share/ca-certificates/traceit-ca.crt
         POSTGRES_SSL_CERT:               /home/django/server.crt
         POSTGRES_SSL_KEY:                /home/django/server.key
-
 
         POSTGRES_RESEARCH_HOST:     "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
         POSTGRES_RESEARCH_PORT:     "{{ lookup('ansible.builtin.env', 'POSTGRES_PORT') }}"
