@@ -160,6 +160,10 @@
         - REVOKE CONNECT ON DATABASE maindb FROM PUBLIC;
         - GRANT CONNECT ON DATABASE maindb TO maindb_readwrite;
 
+        - \c authdb;      GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authdb_readwrite;
+        - \c researchsdb; GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO researchsdb_readwrite;
+        - \c maindb;      GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO maindb_readwrite;
+
     - name: Set password for root user
       become: yes
       become_user: postgres
