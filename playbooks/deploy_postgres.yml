@@ -177,6 +177,8 @@
         - authdb
         - researchsdb
         - maindb
+      register: perms_debug
+    - debug: msg={{ perms_debug }}
 
     - name: Set password for root user
       become: yes
