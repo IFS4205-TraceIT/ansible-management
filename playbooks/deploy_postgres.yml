@@ -170,7 +170,7 @@
           - -d
           - "{{ item }}"
           - -c  
-          - "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA PUBLIC TO {{ item }}_readwrite"
+          - "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA PUBLIC TO {{ item }}_readwrite;"
       environment:
         LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib 
       loop:
