@@ -180,6 +180,27 @@
       register: perms_debug
     - debug: msg={{ perms_debug }}
 
+    - name:   Check CRUD permissions
+      become: yes
+      become_user: postgres
+      args:
+        chdir: /home/postgres/postgresql_tde/bin
+      ansible.builtin.command:
+        argv:
+          - ./psql
+          - -d
+          - "{{ item }}"
+          - -c  
+          - "select grantee, table_catalog, privilege_type, table_schema, table_name from information_schema.table_privileges where grantee = '{{ item }}_readwrite' order by grantee, table_schema, table_name;"
+      environment:
+        LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib 
+      loop:
+        - authdb
+        - researchsdb
+        - maindb
+      register: perms_debug
+    - debug: msg={{ perms_debug }}
+
     - name: Set password for root user
       become: yes
       become_user: postgres
