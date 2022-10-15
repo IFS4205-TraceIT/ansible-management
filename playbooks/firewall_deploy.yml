@@ -1,0 +1,83 @@
+- name: Configure CI/CD VM 5
+  hosts: traceit-05-i.comp.nus.edu.sg
+  become: yes
+  
+  task:
+    - name: Enable firewall and disable all connections
+      ufw:
+        state: enabled
+        policy: rejected
+
+    - name: Enable ssh 
+      ufw:
+        rule: allow
+        port: ssh
+
+
+- name: Configure ssh for the remaining VMs
+  hosts: all:!traceit-05-i.comp.nus.edu.sg
+  become: yes
+
+  task:
+    - name: Enable firewall and disable all connections
+      ufw:
+        state: enabled
+        policy: rejected
+
+    - name: Enable ssh only for VM 5
+      ufw:
+        rule: allow
+        port: ssh
+        from: "{{ lookup('dig', 'traceit-05-i.comp.nus.edu.sg') }}"
+
+
+- name: Configure web application for VMs 1,2,3
+  hosts: django
+  become: yes
+
+  task:
+    - name: Enable Django port
+      ufw:
+        rule: allow
+        port: '8000'
+        from: "{{ lookup('dig', 'traceit-04-i.comp.nus.edu.sg') }}"
+    
+    - name: Enable connection to PostgreSQL
+      ufw:
+        rule: allow
+        port: '5432'
+        from: "{{ lookup('dig', item) }}"
+      loop:
+        - traceit-01-i.comp.nus.edu.sg
+        - traceit-02-i.comp.nus.edu.sg
+        - traceit-03-i.comp.nus.edu.sg
+        - traceit-07-i.comp.nus.edu.sg
+
+- name: Configure Ngnix on VM 4
+  hosts: ngnix
+  become: yes
+
+  task:
+    - name: Allow HTTP Traffic
+      ufw:
+        rule: allow
+        port: '80'
+
+    - name: Allow HTTPS Traffic
+      ufw:
+        rule: allow
+        port: '443'
+
+# Configure VM 6 not done because grafana loki host unknown src
+
+- name: Configure Vault on VM 7
+  hosts: vault
+  become: yes
+
+  task:
+    - name: Allow Web Applications to connect to vault
+      ufw:
+        rule: allow
+        port: '8200'
+        from: "{{ lookup('dig', item) }}"
+      with_items: "{{groups['django']}}"
