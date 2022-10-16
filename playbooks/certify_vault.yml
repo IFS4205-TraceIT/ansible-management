@@ -2,7 +2,6 @@
   hosts: vault
   gather_facts: no
   become: yes
-  become_user: vault
 
   environment:
     VAULT_SKIP_VERIFY: true
@@ -11,6 +10,8 @@
   
   tasks:
     - name: Request certificate for traceit-07-i
+      become: yes
+      become_user: vault
       ansible.builtin.command:
         argv:
           - vault
@@ -22,17 +23,48 @@
       register: traceit_07_i_output
     
     - name: Update Vault server certificate
+      become: yes
+      become_user: vault
       ansible.builtin.copy:
         dest: /opt/vault/tls/tls.crt
         content: "{{ traceit_07_i_output.stdout | from_json | json_query('data.certificate') }}"
     
     - name: Update Vault server private key
+      become: yes
+      become_user: vault
       ansible.builtin.copy:
         dest: /opt/vault/tls/tls.key
         content: "{{ traceit_07_i_output.stdout | from_json | json_query('data.private_key') }}"
+
+    # - name: Copy configuration file
+    #   become: yes
+    #   become_user: vault
+    #   ansible.builtin.copy:
+    #     src: vault/vault.hcl
+    #     dest: /etc/vault.d/vault.hcl
     
     - name: Reload Vault without getting sealed
       ansible.builtin.shell: |
         kill -SIGHUP $(pidof vault)
       args:
         executable: /bin/bash
+
+    # - name: Restart vault service
+    #   ansible.builtin.systemd:
+    #     name: vault
+    #     enabled: yes
+    #     state: restarted
+
+    # - name: Unseal vault
+    #   become: yes
+    #   become_user: vault
+    #   ansible.builtin.uri:
+    #     url: "https://traceit-07-i.comp.nus.edu.sg:8200/v1/sys/unseal"
+    #     method: POST
+    #     body:
+    #       key: "{{ lookup('ansible.builtin.env', 'UNSEAL_KEY') }}"
+    #     body_format: json
+    #     headers:
+    #       Content-Type: "application/json"
+    #     validate_certs: yes
+    #     ca_path: /usr/local/share/ca-certificates/traceit-ca.crt

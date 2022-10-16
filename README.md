@@ -24,6 +24,7 @@ Once the status of the workflow run turns green :heavy_check_mark:, it means tha
     - [The operator workstation](#the-operator-workstation)
     - [The orchestrated hosts in the `prod` and `dev` environment](#the-orchestrated-hosts-in-the-prod-and-dev-environment)
     - [The `Vault` server](#the-vault-server)
+    - [The Github Action Secrets](#the-github-action-secrets)
 
 ## Day-to-Day operations
 
@@ -82,8 +83,8 @@ Steps:
 1.  Execute the `setup_hosts.yml` playbook:
     ```bash
     ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook \
-        -i hosts_prod.yml
-        -Kk
+        -i hosts_prod.yml \
+        -Kk \
         playbooks/setup_hosts.yml
     ```
 
@@ -106,26 +107,22 @@ Steps:
     * `VAULT_TOKEN_DEV` if you are deploying in the `dev` environment
     * `VAULT_TOKEN_PROD` if you are deploying in the `prod` environment
 
-4) Setup the PKI in Vault:
+4) Setup the PKI and configure Vault:
     ```bash
     export UNSEAL_KEY=<UNSEAL KEY 1> VAULT_TOKEN=<INITIAL ROOT TOKEN>
     ansible-playbook \
         -i hosts_prod.yml \
-        playbooks/configure_pki.yml
-    ```
-
-5) Configure Vault to use its newly generated certificate:
-    ```bash
-    export VAULT_TOKEN=<INITIAL ROOT TOKEN>
+        playbooks/configure_pki.yml && \
     ansible-playbook \
         -i hosts_prod.yml \
-        playbooks/certify_vault.yml
-    ```
-
-6) Mount the required secret engines:
-    ```bash
-    export VAULT_TOKEN=<INITIAL ROOT TOKEN>
+        playbooks/certify_vault.yml && \
     ansible-playbook \
         -i hosts_prod.yml \
-        playbooks/mount_vault.yml    
+        playbooks/mount_vault.yml   
     ```
+
+### The Github Action Secrets
+
+1) Save the PAT (Personal Access Token) of the Github user that has read-only access to the organization, as `PAT`.
+
+2) Base64-encode the CA certificate as `VAULT_CA_CERT_DEV` for `dev`, `VAULT_CA_CERT_PROD` for `prod`.

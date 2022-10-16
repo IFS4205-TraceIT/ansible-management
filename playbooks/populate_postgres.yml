@@ -119,30 +119,21 @@
       register: migrations
     - debug: msg={{ migrations.stdout_lines }}
 
-- name: Check DB permissions
-  hosts: traceit-01-i.comp.nus.edu.sg
-  gather_facts: no
-  become: yes # Sudo as root
-
-  tasks:
-    - name: Check CRUD permissions
+    - name: Add fake users
       become: yes
-      become_user: postgres
+      become_user: django
       args:
-        chdir: /home/postgres/postgresql_tde/bin
-      ansible.builtin.command:
-        argv:
-          - ./psql
-          - -d
-          - "{{ item }}"
-          - -c  
-          - "select grantee, table_catalog, privilege_type, table_schema, table_name from information_schema.table_privileges where grantee = '{{ item }}_readwrite' order by grantee, table_schema, table_name;"
+        chdir: /home/django/repo
+      ansible.builtin.shell: |
+        export PATH=/home/django/.local/bin:$PATH
+        poetry run python sampledata/generate.py 1000
       environment:
-        LD_LIBRARY_PATH: /home/postgres/postgresql_tde/lib 
-      loop:
-        - authdb
-        - researchsdb
-        - maindb
-      register: perms_debug
-    - debug: msg={{ perms_debug }}
-    
+        # PostgreSQL
+        POSTGRES_HOST:              "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
+        POSTGRES_PORT:              "{{ lookup('ansible.builtin.env', 'POSTGRES_PORT') }}"
+        POSTGRES_DB:                maindb
+        POSTGRES_USER:              "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
+        POSTGRES_PASSWORD:          "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
+        POSTGRES_SSL_ROOT_CERT:          /usr/local/share/ca-certificates/traceit-ca.crt
+        POSTGRES_SSL_CERT:               /home/django/server.crt
+        POSTGRES_SSL_KEY:                /home/django/server.key
