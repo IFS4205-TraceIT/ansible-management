@@ -33,15 +33,15 @@ jobs:
           fi
     
     outputs:
-      runner-label: "${{ steps.runner-settings.outputs.runner-label }}"
-      container-options: "${{ steps.runner-settings.outputs.container-options }}"
+      RUNNER_LABEL: "${{ steps.runner-settings.outputs.RUNNER_LABEL }}"
+      CONTAINER_OPTIONS: "${{ steps.runner-settings.outputs.CONTAINER_OPTIONS }}"
   
   unseal:
     needs: coordinator
-    runs-on: ${{ needs.coordinator.outputs.runner-label }}
+    runs-on: ${{ needs.coordinator.outputs.RUNNER_LABEL }}
     container: 
       image: willhallonline/ansible:2.12-ubuntu-20.04
-      options: ${{ needs.coordinator.outputs.container-options }}
+      options: ${{ needs.coordinator.outputs.CONTAINER_OPTIONS }}
 
     steps:
       - name: Cleanup build folder
