@@ -22,10 +22,10 @@ jobs:
         run: |
           if [[ "${{ inputs.deploy_environment }}" == "prod" ]]; then
             echo 'RUNNER_LABEL=cd' >> $GITHUB_OUTPUT
-            echo 'CONTAINER_OPTIONS="--dns 137.132.90.2 --dns 137.132.85.2 --dns 8.8.8.8"' >> $GITHUB_OUTPUT
+            echo 'CONTAINER_OPTIONS=--dns 137.132.90.2 --dns 137.132.85.2 --dns 8.8.8.8' >> $GITHUB_OUTPUT
           else
             echo 'RUNNER_LABEL=cd-test' >> $GITHUB_OUTPUT
-            echo 'CONTAINER_OPTIONS="--dns 192.168.1.101 --dns 8.8.8.8"' >> $GITHUB_OUTPUT
+            echo 'CONTAINER_OPTIONS=--dns 192.168.1.101 --dns 8.8.8.8' >> $GITHUB_OUTPUT
           fi
     
     outputs:
