@@ -114,3 +114,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
             --inventory hosts_prod.yml
+      
+      - name: Sent alert to Telegram chat
+        if: inputs.deploy_environment == "prod"
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: ":check_mark: Teardown from production servers successfully completed."

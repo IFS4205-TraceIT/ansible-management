@@ -324,3 +324,11 @@ jobs:
         env:
           VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
           VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
+
+      - name: Sent alert to Telegram chat
+        if: inputs.deploy_environment == "prod"
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: ":check_mark: Deployment to production servers successfully completed."
