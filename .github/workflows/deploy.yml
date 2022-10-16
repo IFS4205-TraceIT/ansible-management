@@ -326,7 +326,7 @@ jobs:
           VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
 
       - name: Sent alert to Telegram chat
-        if: inputs.deploy_environment == "prod"
+        if: inputs.deploy_environment == 'prod'
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
