@@ -82,8 +82,8 @@ Steps:
 1.  Execute the `setup_hosts.yml` playbook:
     ```bash
     ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook \
-        -i hosts_prod.yml
-        -Kk
+        -i hosts_prod.yml \
+        -Kk \
         playbooks/setup_hosts.yml
     ```
 
