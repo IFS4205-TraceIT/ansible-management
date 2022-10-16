@@ -331,4 +331,9 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "✔️ Deployment to production servers successfully completed."
+          message: |
+            ✔️ Deployment to production servers successfully completed.
+
+            📍 Tracer Portal: https://traceit-04.comp.nus.edu.sg/tracer
+            📚 Researcher Portal: https://traceit-04.comp.nus.edu.sg/research
+            📱 Mobile Application: https://github.com/IFS4205-TraceIT/traceit-app/releases/tag/vlatest
