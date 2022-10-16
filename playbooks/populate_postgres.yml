@@ -118,3 +118,22 @@
         POSTGRES_RESEARCH_SSL_KEY:       /home/django/server.key
       register: migrations
     - debug: msg={{ migrations.stdout_lines }}
+
+    - name: Add fake users
+      become: yes
+      become_user: django
+      args:
+        chdir: /home/django/repo
+      ansible.builtin.shell: |
+        export PATH=/home/django/.local/bin:$PATH
+        poetry run python sampledata/generate.py 1000
+      environment:
+        # PostgreSQL
+        POSTGRES_HOST:              "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
+        POSTGRES_PORT:              "{{ lookup('ansible.builtin.env', 'POSTGRES_PORT') }}"
+        POSTGRES_DB:                maindb
+        POSTGRES_USER:              "{{ lookup('ansible.builtin.env', 'POSTGRES_USER') }}"
+        POSTGRES_PASSWORD:          "{{ lookup('ansible.builtin.env', 'POSTGRES_PASSWORD') }}"
+        POSTGRES_SSL_ROOT_CERT:          /usr/local/share/ca-certificates/traceit-ca.crt
+        POSTGRES_SSL_CERT:               /home/django/server.crt
+        POSTGRES_SSL_KEY:                /home/django/server.key
