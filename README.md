@@ -24,6 +24,7 @@ Once the status of the workflow run turns green :heavy_check_mark:, it means tha
     - [The operator workstation](#the-operator-workstation)
     - [The orchestrated hosts in the `prod` and `dev` environment](#the-orchestrated-hosts-in-the-prod-and-dev-environment)
     - [The `Vault` server](#the-vault-server)
+    - [The Github Action Secrets](#the-github-action-secrets)
 
 ## Day-to-Day operations
 
@@ -119,3 +120,9 @@ Steps:
         -i hosts_prod.yml \
         playbooks/mount_vault.yml   
     ```
+
+### The Github Action Secrets
+
+1) Save the PAT (Personal Access Token) of the Github user that has read-only access to the organization, as `PAT`.
+
+2) Base64-encode the CA certificate as `VAULT_CA_CERT_DEV` for `dev`, `VAULT_CA_CERT_PROD` for `prod`.
