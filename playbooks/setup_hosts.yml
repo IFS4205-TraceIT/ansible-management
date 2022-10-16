@@ -25,16 +25,19 @@
         update_cache: true
         cache_valid_time: 3600
 
-    - name: Install acl
+    - name: Install required packages
       ansible.builtin.apt:
-        name: acl
+        name: "{{ item }}"
         state: present
+      loop:
+        - acl
+        - python3-pip
 
-    - name: Install python3-pip
-      ansible.builtin.apt:
-        name: python3-pip
-        state: present
-
-    - name: Install hvac python package
+    - name: Install required python packages
       ansible.builtin.pip:
-        name: hvac
+        name: "{{ item }}"
+      loop:
+        - hvac
+        - dnspython
+
+    
