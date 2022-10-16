@@ -38,7 +38,7 @@
       become: yes
       become_user: vault
       ansible.builtin.copy:
-        src: vault/vault.hcl
+        src: vault/initial_vault.hcl
         dest: /etc/vault.d/vault.hcl
 
     - name: Start vault service
