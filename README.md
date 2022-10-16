@@ -106,26 +106,16 @@ Steps:
     * `VAULT_TOKEN_DEV` if you are deploying in the `dev` environment
     * `VAULT_TOKEN_PROD` if you are deploying in the `prod` environment
 
-4) Setup the PKI in Vault:
+4) Setup the PKI and configure Vault:
     ```bash
     export UNSEAL_KEY=<UNSEAL KEY 1> VAULT_TOKEN=<INITIAL ROOT TOKEN>
     ansible-playbook \
         -i hosts_prod.yml \
-        playbooks/configure_pki.yml
-    ```
-
-5) Configure Vault to use its newly generated certificate:
-    ```bash
-    export VAULT_TOKEN=<INITIAL ROOT TOKEN>
+        playbooks/configure_pki.yml && \
     ansible-playbook \
         -i hosts_prod.yml \
-        playbooks/certify_vault.yml
-    ```
-
-6) Mount the required secret engines:
-    ```bash
-    export VAULT_TOKEN=<INITIAL ROOT TOKEN>
+        playbooks/certify_vault.yml && \
     ansible-playbook \
         -i hosts_prod.yml \
-        playbooks/mount_vault.yml    
+        playbooks/mount_vault.yml   
     ```
