@@ -41,6 +41,14 @@ jobs:
       options: ${{ needs.coordinator.outputs.CONTAINER_OPTIONS }}
 
     steps:
+      - name: Send alert to Telegram chat
+        if: inputs.deploy_environment == 'prod'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: "✔️ Teardown from production servers successfully initiated."
+
       - name: Cleanup build folder
         run: |
           ls -la ./
@@ -114,11 +122,3 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           options: |
             --inventory hosts_prod.yml
-      
-      - name: Sent alert to Telegram chat
-        if: inputs.deploy_environment == 'prod'
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "✔️ Teardown from production servers successfully completed."
