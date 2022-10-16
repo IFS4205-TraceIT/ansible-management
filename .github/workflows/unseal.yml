@@ -63,11 +63,11 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ inputs.deploy_environment }}" == "prod" ]]; then
-            echo 'VAULT_TOKEN="${{ secrets.VAULT_TOKEN_PROD }}"' >> $GITHUB_OUTPUT
-            echo 'VAULT_CACERT="${{ secrets.VAULT_CA_CERT_PROD }}"' >> $GITHUB_OUTPUT
+            echo 'VAULT_TOKEN=${{ secrets.VAULT_TOKEN_PROD }}' >> $GITHUB_OUTPUT
+            echo 'VAULT_CACERT=${{ secrets.VAULT_CA_CERT_PROD }}' >> $GITHUB_OUTPUT
           else
-            echo 'VAULT_TOKEN="${{ secrets.VAULT_TOKEN_DEV }}"' >> $GITHUB_OUTPUT
-            echo 'VAULT_CACERT="${{ secrets.VAULT_CA_CERT_DEV }}"' >> $GITHUB_OUTPUT
+            echo 'VAULT_TOKEN=${{ secrets.VAULT_TOKEN_DEV }}' >> $GITHUB_OUTPUT
+            echo 'VAULT_CACERT=${{ secrets.VAULT_CA_CERT_DEV }}' >> $GITHUB_OUTPUT
           fi
 
       - name: Unseal Vault
