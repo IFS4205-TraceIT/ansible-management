@@ -255,11 +255,11 @@ jobs:
           POSTGRES_AUTH_USER:     "${{ steps.tracer_backend-secrets.outputs.POSTGRES_AUTH_USER }}"
           POSTGRES_AUTH_PASSWORD: "${{ steps.tracer_backend-secrets.outputs.POSTGRES_AUTH_PASSWORD }}"
 
-          POSTGRES_HOST:          traceit-01-i.comp.nus.edu.sg
-          POSTGRES_PORT:          5432
-          POSTGRES_DB:            researchsdb
-          POSTGRES_USER:          "${{ steps.tracer_backend-secrets.outputs.POSTGRES_RESEARCH_USER }}"
-          POSTGRES_PASSWORD:      "${{ steps.tracer_backend-secrets.outputs.POSTGRES_RESEARCH_PASSWORD }}"
+          POSTGRES_RESEARCH_HOST:          traceit-01-i.comp.nus.edu.sg
+          POSTGRES_RESEARCH_PORT:          5432
+          POSTGRES_RESEARCH_DB:            researchsdb
+          POSTGRES_RESEARCH_USER:          "${{ steps.tracer_backend-secrets.outputs.POSTGRES_RESEARCH_USER }}"
+          POSTGRES_RESEARCH_PASSWORD:      "${{ steps.tracer_backend-secrets.outputs.POSTGRES_RESEARCH_PASSWORD }}"
 
         with:
           playbook: playbooks/deploy_django.yml
