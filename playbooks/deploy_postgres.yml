@@ -111,6 +111,11 @@
         group: postgres
         mode: 0600
         content: "{{ server_certificate_output.data.data.private_key }}"
+    
+    - name: Ensure the locale exists
+      locale_gen:
+        name: en_US.UTF-8
+        state: present
 
     - name: Start database service
       become: yes
