@@ -331,4 +331,4 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ":check_mark: Deployment to production servers successfully completed."
+          message: "✔️ Deployment to production servers successfully completed."

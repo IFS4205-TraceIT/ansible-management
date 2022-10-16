@@ -121,4 +121,4 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ":check_mark: Teardown from production servers successfully completed."
+          message: "✔️ Teardown from production servers successfully completed."
