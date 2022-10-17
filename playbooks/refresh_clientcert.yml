@@ -55,3 +55,7 @@
         mode: 0600
         content: "{{ user_certificate_output.stdout | from_json | json_query('data.private_key') }}"
     
+    - name: Delete script
+      ansible.builtin.file:
+        path: "{{ registered_user['home'] }}/refresh_certificate.py"
+        state: absent
