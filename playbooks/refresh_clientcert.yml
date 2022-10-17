@@ -1,0 +1,57 @@
+- name: Refresh client certificate of users
+  hosts: "{{ lookup('ansible.builtin.env', 'SERVICE_HOSTS') }}"
+  gather_facts: no
+  become: yes
+
+  tasks:
+
+    - name: Create user
+      ansible.builtin.user:
+        name: "{{ lookup('ansible.builtin.env', 'SERVICE_USER') }}"
+        shell: /bin/false # Don't allow login
+      register: registered_user
+
+    - name: Download refresh_certificate.py
+      ansible.builtin.copy:
+        src: refresh_certificate.py
+        dest: "{{ registered_user['home'] }}/refresh_certificate.py"
+        owner: "{{ lookup('ansible.builtin.env', 'SERVICE_USER') }}"
+        group: "{{ lookup('ansible.builtin.env', 'SERVICE_USER') }}"
+        mode: 0400 
+    
+    - name: Run refresh_certificate.py
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ registered_user['home'] }}/refresh_certificate.py"
+      environment:
+        VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
+        VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+        VAULT_CACERT: /usr/local/share/ca-certificates/traceit-ca.crt
+        VAULT_CLIENTCERT: "{{ registered_user['home'] }}/server.crt"
+        VAULT_CLIENTKEY: "{{ registered_user['home'] }}/server.key"
+
+        HOSTNAME: "{{ inventory_hostname }}"
+        TTL: 767h
+      register: user_certificate_output
+
+    - name: Add server certificate
+      become: yes
+      become_user: "{{ lookup('ansible.builtin.env', 'SERVICE_USER') }}"
+      ansible.builtin.copy:
+        dest: "{{ registered_user['home'] }}/server.crt"
+        owner: "{{ lookup('ansible.builtin.env', 'SERVICE_USER') }}"
+        group: "{{ lookup('ansible.builtin.env', 'SERVICE_USER') }}"
+        mode: 0600
+        content: "{{ user_certificate_output.stdout | from_json | json_query('data.certificate') }}"
+
+    - name: Add server private key
+      become: yes
+      become_user: "{{ lookup('ansible.builtin.env', 'SERVICE_USER') }}"
+      ansible.builtin.copy:
+        dest: "{{ registered_user['home'] }}/server.key"
+        owner: "{{ lookup('ansible.builtin.env', 'SERVICE_USER') }}"
+        group: "{{ lookup('ansible.builtin.env', 'SERVICE_USER') }}"
+        mode: 0600
+        content: "{{ user_certificate_output.stdout | from_json | json_query('data.private_key') }}"
+    

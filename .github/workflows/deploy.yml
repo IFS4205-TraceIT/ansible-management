@@ -73,6 +73,66 @@ jobs:
           echo "VAULT_CLIENTCERT=$(cat /server.crt | base64 -w0)" >> $GITHUB_OUTPUT
           echo "VAULT_CLIENTKEY=$(cat /server.key | base64 -w0)" >> $GITHUB_OUTPUT
 
+      - name: Refresh certificates for django
+        env:
+          VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
+          SERVICE_HOSTS: django
+          SERVICE_USER: django
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/refresh_clientcert.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Refresh certificates for postgres
+        env:
+          VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
+          SERVICE_HOSTS: postgres
+          SERVICE_USER: postgres
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/refresh_clientcert.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Refresh certificates for nginx
+        env:
+          VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
+          SERVICE_HOSTS: nginx
+          SERVICE_USER: root
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/refresh_clientcert.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+      
+      - name: Refresh certificates for vault
+        env:
+          VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
+          SERVICE_HOSTS: vault
+          SERVICE_USER: vault
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/refresh_clientcert.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Refresh certificates for cicd
+        env:
+          VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
+          SERVICE_HOSTS: cicd
+          SERVICE_USER: cicd
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/refresh_clientcert.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
       - name: Generate database secrets for Database 1
         env:
           DATABASE_NAME: database1
