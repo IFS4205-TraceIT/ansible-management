@@ -112,7 +112,12 @@ Steps:
     export UNSEAL_KEY=<UNSEAL KEY 1> VAULT_TOKEN=<INITIAL ROOT TOKEN>
     ansible-playbook \
         -i hosts_prod.yml \
-        playbooks/configure_pki.yml && \
+        playbooks/configure_pki.yml
+    ```
+
+5) Execute the rest:
+    ```bash
+    export UNSEAL_KEY=<UNSEAL KEY 1> VAULT_TOKEN=<INITIAL ROOT TOKEN>
     ansible-playbook \
         -i hosts_prod.yml \
         playbooks/certify_vault.yml && \

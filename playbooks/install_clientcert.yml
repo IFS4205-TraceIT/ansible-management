@@ -1,0 +1,46 @@
+- name: Update/install client certificate to users
+  hosts: "{{ service_hosts }}"
+  gather_facts: no
+  become: yes
+
+  tasks:
+
+    - name: Create user
+      ansible.builtin.user:
+        name: "{{ service_user }}"
+        shell: /bin/false # Don't allow login
+      register: registered_user
+
+    - name: Request new server certificate
+      community.hashi_vault.vault_write:
+        url: "https://traceit-07-i.comp.nus.edu.sg:8200"
+        path: pki_int/issue/{{ inventory_hostname }}
+        auth_method: token
+        token: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+        validate_certs: no
+        token_validate: false
+        data:
+          common_name: "{{ inventory_hostname }}"
+          ttl: 767h
+      register: user_certificate_output
+    
+    - name: Add server certificate
+      become: yes
+      become_user: "{{ service_user }}"
+      ansible.builtin.copy:
+        dest: "{{ registered_user['home'] }}/server.crt"
+        owner: "{{ service_user }}"
+        group: "{{ service_user }}"
+        mode: 0600
+        content: "{{ user_certificate_output.data.data.certificate }}"
+
+    - name: Add server private key
+      become: yes
+      become_user: "{{ service_user }}"
+      ansible.builtin.copy:
+        dest: "{{ registered_user['home'] }}/server.key"
+        owner: "{{ service_user }}"
+        group: "{{ service_user }}"
+        mode: 0600
+        content: "{{ user_certificate_output.data.data.private_key }}"
+    
