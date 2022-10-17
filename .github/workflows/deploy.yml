@@ -97,7 +97,7 @@ jobs:
           exportEnv: false
           caCertificate: ${{ steps.secrets.outputs.VAULT_CACERT }}
           clientCertificate: ${{ steps.secrets.outputs.VAULT_CLIENTCERT }}
-          clientKey: ${{ steps.secrets.secrets.VAULT_CLIENTKEY }}
+          clientKey: ${{ steps.secrets.outputs.VAULT_CLIENTKEY }}
 
       - name: Download PostgreSQL TDE release
         uses: dsaltares/fetch-gh-release-asset@master
