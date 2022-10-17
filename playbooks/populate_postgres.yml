@@ -15,26 +15,14 @@
         name: django
         shell: /bin/false # Don't allow login
 
-    - name: Request new server certificate
-      community.hashi_vault.vault_write:
-        url: "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}"
-        path: pki_int/issue/traceit-05-i.comp.nus.edu.sg
-        auth_method: token
-        token: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
-        validate_certs: yes
-        token_validate: false
-        data:
-          common_name: traceit-05-i.comp.nus.edu.sg
-          ttl: 767h
-      register: server_certificate_output
-
     - name: Add certificate
       ansible.builtin.copy:
         dest: /home/django/server.crt
         owner: django
         group: django
         mode: 0400
-        content: "{{ server_certificate_output.data.data.certificate }}"
+        src: /home/cicd/server.crt
+        remote_src: yes
 
     - name: Add private key
       ansible.builtin.copy:
@@ -42,7 +30,8 @@
         owner: django
         group: django
         mode: 0400
-        content: "{{ server_certificate_output.data.data.private_key }}"
+        src: /home/cicd/server.key
+        remote_src: yes
 
     - name: Add Python Repository
       ansible.builtin.apt_repository:
