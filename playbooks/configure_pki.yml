@@ -187,6 +187,12 @@
     service_hosts: nginx
     service_user: root
 
+- name: Insert certs for cicd
+  ansible.builtin.import_playbook: install_clientcert.yml
+  vars:
+    service_hosts: cicd
+    service_user: cicd
+
 - name: Insert certs for vault
   ansible.builtin.import_playbook: install_clientcert.yml
   vars:

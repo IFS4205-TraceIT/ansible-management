@@ -115,6 +115,10 @@ Steps:
         playbooks/configure_pki.yml
     ```
 
+    Base64-encode the client certificate as `VAULT_CA_CLIENTCERT_DEV` for `dev`, `VAULT_CA_CLIENTCERT_PROD` for `prod`.
+    Base64-encode the client private key as `VAULT_CA_CLIENTKEY_DEV` for `dev`, `VAULT_CA_CLIENTKEY_PROD` for `prod`.
+    Base64-encode the CA certificate as `VAULT_CA_CERT_DEV` for `dev`, `VAULT_CA_CERT_PROD` for `prod`.
+
 5) Execute the rest:
     ```bash
     export UNSEAL_KEY=<UNSEAL KEY 1> VAULT_TOKEN=<INITIAL ROOT TOKEN>
@@ -130,4 +134,7 @@ Steps:
 
 1) Save the PAT (Personal Access Token) of the Github user that has read-only access to the organization, as `PAT`.
 
-2) Base64-encode the CA certificate as `VAULT_CA_CERT_DEV` for `dev`, `VAULT_CA_CERT_PROD` for `prod`.
+2) Save the necessary PKI components:
+   * Base64-encode the client certificate as `VAULT_CA_CLIENTCERT_DEV` for `dev`, `VAULT_CA_CLIENTCERT_PROD` for `prod`.
+   * Base64-encode the client private key as `VAULT_CA_CLIENTKEY_DEV` for `dev`, `VAULT_CA_CLIENTKEY_PROD` for `prod`.
+   * Base64-encode the CA certificate as `VAULT_CA_CERT_DEV` for `dev`, `VAULT_CA_CERT_PROD` for `prod`.
