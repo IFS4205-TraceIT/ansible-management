@@ -9,6 +9,7 @@
     VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
     VAULT_CLIENT_CERT: /opt/vault/tls/tls.crt
     VAULT_CLIENT_KEY: /opt/vault/tls/tls.key
+    VAULT_CACERT: /usr/local/share/ca-certificates/traceit-ca.crt
 
   tasks:
 
