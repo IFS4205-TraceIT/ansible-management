@@ -58,10 +58,7 @@ PermitRootLogin no
 
 IgnoreRhosts yes
 HostbasedAuthentication no
-PermitEmptyPasswords no
-X11Forwarding no
 MaxAuthTries 5
 Ciphers aes128-ctr,aes192-ctr,aes256-ctr
 ClientAliveInterval 900 
 ClientAliveCountMax 0
-UsePAM yes

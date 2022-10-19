@@ -55,7 +55,7 @@
       kernel.panic: 10
   
   tasks:      
-    - name: Make backup of existing sshd_config
+    - name: Restore backup of existing sshd_config
       become: yes
       ansible.builtin.copy:
         src: /etc/ssh/sshd_config.bk
@@ -68,7 +68,7 @@
         name: sshd
         state: restarted
     
-    - name: Change various sysctl-settings
+    - name: Revert various sysctl-settings
       become: yes
       sysctl:
         name: '{{ item.key }}'
