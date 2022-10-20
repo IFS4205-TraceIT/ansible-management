@@ -79,19 +79,6 @@
         group: postgres
         mode: 0600
 
-    - name: Request new server certificate
-      community.hashi_vault.vault_write:
-        url: "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}"
-        path: pki_int/issue/{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}
-        auth_method: token
-        token: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
-        validate_certs: yes
-        token_validate: false
-        data:
-          common_name: "{{ lookup('ansible.builtin.env', 'DB_HOSTS') }}"
-          ttl: 767h
-      register: server_certificate_output
-
     - name: Add server certificate
       become: yes
       become_user: postgres
@@ -100,7 +87,8 @@
         owner: postgres
         group: postgres
         mode: 0600
-        content: "{{ server_certificate_output.data.data.certificate }}"
+        src: /home/postgres/server.crt
+        remote_src: yes
 
     - name: Add server private key
       become: yes
@@ -110,8 +98,9 @@
         owner: postgres
         group: postgres
         mode: 0600
-        content: "{{ server_certificate_output.data.data.private_key }}"
-    
+        src: /home/postgres/server.key
+        remote_src: yes
+
     - name: Ensure the locale exists
       locale_gen:
         name: en_US.UTF-8
@@ -205,6 +194,9 @@
   environment:
     VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
     VAULT_ADDR: "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}"
+    VAULT_CLIENT_CERT: /opt/vault/tls/tls.crt
+    VAULT_CLIENT_KEY: /opt/vault/tls/tls.key
+    VAULT_CACERT: /usr/local/share/ca-certificates/traceit-ca.crt
 
   tasks:
 

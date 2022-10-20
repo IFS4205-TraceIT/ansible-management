@@ -43,19 +43,6 @@
         poetry config --local virtualenvs.options.no-setuptools true
         poetry config --local virtualenvs.options.no-pip true
         poetry install --no-interaction
-
-    - name: Request new server certificate
-      community.hashi_vault.vault_write:
-        url: "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}"
-        path: pki_int/issue/{{ lookup('ansible.builtin.env', 'APP_HOSTS') }}
-        auth_method: token
-        token: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
-        validate_certs: yes
-        token_validate: false
-        data:
-          common_name: "{{ lookup('ansible.builtin.env', 'APP_HOSTS') }}"
-          ttl: 767h
-      register: server_certificate_output
     
     - name: Add server certificate
       become: yes
@@ -65,7 +52,8 @@
         owner: django
         group: django
         mode: 0600
-        content: "{{ server_certificate_output.data.data.certificate }}"
+        src: /home/django/server.crt
+        remote_src: yes
 
     - name: Add server private key
       become: yes
@@ -75,7 +63,8 @@
         owner: django
         group: django
         mode: 0600
-        content: "{{ server_certificate_output.data.data.private_key }}"
+        src: /home/django/server.key
+        remote_src: yes
 
     - name: Run gunicorn in daemon mode
       become: yes
@@ -122,6 +111,3 @@
         POSTGRES_RESEARCH_SSL_ROOT_CERT: /usr/local/share/ca-certificates/traceit-ca.crt
         POSTGRES_RESEARCH_SSL_CERT:      /home/django/repo/server.crt
         POSTGRES_RESEARCH_SSL_KEY:       /home/django/repo/server.key
-
-
-        

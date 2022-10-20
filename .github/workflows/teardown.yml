@@ -62,18 +62,6 @@ jobs:
 
       - name: Clone repo
         uses: actions/checkout@v3
-      
-      - name: Retrieve relevant secrets
-        id: secrets
-        shell: bash
-        run: |
-          if [[ "${{ inputs.deploy_environment }}" == "prod" ]]; then
-            echo 'VAULT_TOKEN=${{ secrets.VAULT_TOKEN_PROD }}' >> $GITHUB_OUTPUT
-            echo 'VAULT_CACERT=${{ secrets.VAULT_CA_CERT_PROD }}' >> $GITHUB_OUTPUT
-          else
-            echo 'VAULT_TOKEN=${{ secrets.VAULT_TOKEN_DEV }}' >> $GITHUB_OUTPUT
-            echo 'VAULT_CACERT=${{ secrets.VAULT_CA_CERT_DEV }}' >> $GITHUB_OUTPUT
-          fi
 
       - name: Teardown tracer_backend
         uses: dawidd6/action-ansible-playbook@v2

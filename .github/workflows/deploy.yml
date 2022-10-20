@@ -39,6 +39,10 @@ jobs:
     container: 
       image: willhallonline/ansible:2.12-ubuntu-20.04
       options: ${{ needs.coordinator.outputs.CONTAINER_OPTIONS }}
+      volumes:
+        - /usr/local/share/ca-certificates/traceit-ca.crt:/traceit-ca.crt
+        - /home/cicd/server.crt:/server.crt
+        - /home/cicd/server.key:/server.key
 
     steps:
       - name: Cleanup build folder
@@ -61,16 +65,79 @@ jobs:
         run: |
           if [[ "${{ inputs.deploy_environment }}" == "prod" ]]; then
             echo 'VAULT_TOKEN=${{ secrets.VAULT_TOKEN_PROD }}' >> $GITHUB_OUTPUT
-            echo 'VAULT_CACERT=${{ secrets.VAULT_CA_CERT_PROD }}' >> $GITHUB_OUTPUT
           else
             echo 'VAULT_TOKEN=${{ secrets.VAULT_TOKEN_DEV }}' >> $GITHUB_OUTPUT
-            echo 'VAULT_CACERT=${{ secrets.VAULT_CA_CERT_DEV }}' >> $GITHUB_OUTPUT
           fi
+
+          echo "VAULT_CACERT=$(cat /traceit-ca.crt | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "VAULT_CLIENTCERT=$(cat /server.crt | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "VAULT_CLIENTKEY=$(cat /server.key | base64 -w0)" >> $GITHUB_OUTPUT
+
+      - name: Refresh certificates for django
+        env:
+          VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
+          SERVICE_HOSTS: django
+          SERVICE_USER: django
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/refresh_clientcert.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Refresh certificates for postgres
+        env:
+          VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
+          SERVICE_HOSTS: postgres
+          SERVICE_USER: postgres
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/refresh_clientcert.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Refresh certificates for nginx
+        env:
+          VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
+          SERVICE_HOSTS: nginx
+          SERVICE_USER: root
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/refresh_clientcert.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+      
+      - name: Refresh certificates for vault
+        env:
+          VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
+          SERVICE_HOSTS: vault
+          SERVICE_USER: vault
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/refresh_clientcert.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Refresh certificates for cicd
+        env:
+          VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
+          SERVICE_HOSTS: cicd
+          SERVICE_USER: cicd
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/refresh_clientcert.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
 
       - name: Generate database secrets for Database 1
         env:
           DATABASE_NAME: database1
           VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
+          VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: playbooks/write_database_keys.yml
@@ -89,6 +156,8 @@ jobs:
               kv/database1 root_password | POSTGRES_ROOT_PASSWORD;
           exportEnv: false
           caCertificate: ${{ steps.secrets.outputs.VAULT_CACERT }}
+          clientCertificate: ${{ steps.secrets.outputs.VAULT_CLIENTCERT }}
+          clientKey: ${{ steps.secrets.outputs.VAULT_CLIENTKEY }}
 
       - name: Download PostgreSQL TDE release
         uses: dsaltares/fetch-gh-release-asset@master
@@ -133,6 +202,7 @@ jobs:
         env:
           APP_NAME: tracer_backend
           VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
+          VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: playbooks/write_django_keys.yml
@@ -144,6 +214,7 @@ jobs:
         env:
           APP_NAME: research_backend
           VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
+          VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: playbooks/write_django_keys.yml
@@ -155,6 +226,7 @@ jobs:
         env:
           APP_NAME: contact_backend
           VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
+          VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: playbooks/write_django_keys.yml
@@ -176,6 +248,8 @@ jobs:
               database/creds/maindb_readwrite password | POSTGRES_PASSWORD;
           exportEnv: false
           caCertificate: ${{ steps.secrets.outputs.VAULT_CACERT }}
+          clientCertificate: ${{ steps.secrets.outputs.VAULT_CLIENTCERT }}
+          clientKey: ${{ steps.secrets.outputs.VAULT_CLIENTKEY }}
 
       - name: Get research_backend secrets from Vault
         uses: hashicorp/vault-action@v2.4.0
@@ -191,6 +265,8 @@ jobs:
               database/creds/researchsdb_readwrite password | POSTGRES_RESEARCH_PASSWORD;
           exportEnv: false
           caCertificate: ${{ steps.secrets.outputs.VAULT_CACERT }}
+          clientCertificate: ${{ steps.secrets.outputs.VAULT_CLIENTCERT }}
+          clientKey: ${{ steps.secrets.outputs.VAULT_CLIENTKEY }}
       
       - name: Get contact_backend secrets from Vault
         uses: hashicorp/vault-action@v2.4.0
@@ -206,6 +282,8 @@ jobs:
               database/creds/maindb_readwrite password | POSTGRES_PASSWORD;
           exportEnv: false
           caCertificate: ${{ steps.secrets.outputs.VAULT_CACERT }}
+          clientCertificate: ${{ steps.secrets.outputs.VAULT_CLIENTCERT }}
+          clientKey: ${{ steps.secrets.outputs.VAULT_CLIENTKEY }}
 
       - name: Deploy tracer_backend
         uses: dawidd6/action-ansible-playbook@v2

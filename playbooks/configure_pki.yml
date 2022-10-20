@@ -168,4 +168,33 @@
       ansible.builtin.command:
         argv:
           - update-ca-certificates
-        
+
+- name: Insert certs for django
+  ansible.builtin.import_playbook: install_clientcert.yml
+  vars:
+    service_hosts: django
+    service_user: django
+
+- name: Insert certs for postgres
+  ansible.builtin.import_playbook: install_clientcert.yml
+  vars:
+    service_hosts: postgresql
+    service_user: postgres
+
+- name: Insert certs for nginx
+  ansible.builtin.import_playbook: install_clientcert.yml
+  vars:
+    service_hosts: nginx
+    service_user: root
+
+- name: Insert certs for cicd
+  ansible.builtin.import_playbook: install_clientcert.yml
+  vars:
+    service_hosts: cicd
+    service_user: cicd
+
+- name: Insert certs for vault
+  ansible.builtin.import_playbook: install_clientcert.yml
+  vars:
+    service_hosts: vault
+    service_user: vault

@@ -124,5 +124,3 @@ Steps:
 ### The Github Action Secrets
 
 1) Save the PAT (Personal Access Token) of the Github user that has read-only access to the organization, as `PAT`.
-
-2) Base64-encode the CA certificate as `VAULT_CA_CERT_DEV` for `dev`, `VAULT_CA_CERT_PROD` for `prod`.
