@@ -39,7 +39,8 @@ jobs:
         shell: bash
         run: |
           # Assume production
-          echo 'VAULT_TOKEN=${{ secrets.VAULT_TOKEN_PROD }}' >> $GITHUB_OUTPUT
+          # echo 'VAULT_TOKEN=${{ secrets.VAULT_TOKEN_PROD }}' >> $GITHUB_OUTPUT
+          echo 'VAULT_TOKEN=${{ secrets.VAULT_TOKEN_DEV }}' >> $GITHUB_OUTPUT
 
           echo "VAULT_CACERT=$(cat /traceit-ca.crt | base64 -w0)" >> $GITHUB_OUTPUT
           echo "VAULT_CLIENTCERT=$(cat /server.crt | base64 -w0)" >> $GITHUB_OUTPUT
