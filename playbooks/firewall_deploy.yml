@@ -2,7 +2,7 @@
   hosts: traceit-05-i.comp.nus.edu.sg
   become: yes
 
-  task:
+  tasks:
     - name: Enable firewall and disable all connections
       ufw:
         state: enabled
@@ -18,7 +18,7 @@
   hosts: all:!traceit-05-i.comp.nus.edu.sg
   become: yes
 
-  task:
+  tasks:
     - name: Enable firewall and disable all connections
       ufw:
         state: enabled
@@ -35,7 +35,7 @@
   hosts: django
   become: yes
 
-  task:
+  tasks:
     - name: Enable Django port
       ufw:
         rule: allow
@@ -57,7 +57,7 @@
   hosts: nginx
   become: yes
 
-  task:
+  tasks:
     - name: Allow HTTP Traffic
       ufw:
         rule: allow
@@ -69,7 +69,7 @@
   hosts: vault
   become: yes
 
-  task:
+  tasks:
     - name: Allow other applications to communicate to vault
       ufw:
         rule: allow
