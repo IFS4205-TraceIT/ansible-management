@@ -1,0 +1,25 @@
+name: SSH Tunnel
+on: 
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ci
+    container: 
+      image: willhallonline/ansible:2.12-ubuntu-20.04
+      options: --dns 137.132.90.2 --dns 137.132.85.2 --dns 8.8.8.8
+      volumes:
+        - /usr/local/share/ca-certificates/traceit-ca.crt:/traceit-ca.crt
+        - /home/cicd/server.crt:/server.crt
+        - /home/cicd/server.key:/server.key
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      
+    - name: Setup tunnel
+      uses: joshlarsen/ssh-tunnel-action@main
+      with:
+        timeout: 1h
+        ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+        ngrok_token: ${{ secrets.NGROK_TOKEN }}
