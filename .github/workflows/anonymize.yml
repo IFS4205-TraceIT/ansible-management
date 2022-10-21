@@ -5,7 +5,6 @@ on:
       k_level:
         type: number
         description: What K-anonymity level would you like to use?
-        required: true
 
   schedule:
     # Set to run everyday at 12am SGT = 4pm UTC
