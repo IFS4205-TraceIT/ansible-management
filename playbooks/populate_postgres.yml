@@ -143,6 +143,8 @@
       ansible.builtin.command:
         argv:
           - ./psql
+          - -d
+          - maindb
           - -c  
           - "{{ item }}"
       environment:
