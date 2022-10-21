@@ -12,12 +12,93 @@ on:
 
 jobs:
 
-  anonymize:
-    # runs-on: cd
+  anonymize-prod:
+    runs-on: cd
+    container: 
+      image: willhallonline/ansible:2.12-ubuntu-20.04
+      options: --dns 137.132.90.2 --dns 137.132.85.2 --dns 8.8.8.8
+      volumes:
+        - /usr/local/share/ca-certificates/traceit-ca.crt:/traceit-ca.crt
+        - /home/cicd/server.crt:/server.crt
+        - /home/cicd/server.key:/server.key
+
+    steps:
+      - name: Cleanup build folder
+        run: |
+          ls -la ./
+          rm -rf ./* || true
+          rm -rf ./.??* || true
+          ls -la ./
+
+      - name: Check installation
+        run: |
+          ansible --version
+
+      - name: Clone repo
+        uses: actions/checkout@v3
+      
+      - name: Retrieve relevant secrets
+        id: secrets
+        shell: bash
+        run: |
+          echo 'VAULT_TOKEN=${{ secrets.VAULT_TOKEN_PROD }}' >> $GITHUB_OUTPUT
+
+          echo "VAULT_CACERT=$(cat /traceit-ca.crt | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "VAULT_CLIENTCERT=$(cat /server.crt | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "VAULT_CLIENTKEY=$(cat /server.key | base64 -w0)" >> $GITHUB_OUTPUT
+
+      - name: Get secrets from Vault
+        uses: hashicorp/vault-action@v2.4.0
+        id: anonymize-secrets
+        with:
+          url: https://traceit-07-i.comp.nus.edu.sg:8200
+          token: ${{ steps.secrets.outputs.VAULT_TOKEN }}
+          secrets: |
+              database/creds/maindb_readwrite username | POSTGRES_USER;
+              database/creds/maindb_readwrite password | POSTGRES_PASSWORD;
+              database/creds/researchsdb_readwrite username | POSTGRES_RESEARCH_USER;
+              database/creds/researchsdb_readwrite password | POSTGRES_RESEARCH_PASSWORD;
+          exportEnv: false
+          caCertificate: ${{ steps.secrets.outputs.VAULT_CACERT }}
+          clientCertificate: ${{ steps.secrets.outputs.VAULT_CLIENTCERT }}
+          clientKey: ${{ steps.secrets.outputs.VAULT_CLIENTKEY }}
+
+      - name: Determine K-anonymity level
+        id: k-level
+        shell: bash
+        run: |
+          if [[ "${{ inputs.k_level }}" != "" ]]; then
+            echo 'K_LEVEL=${{ inputs.k_level }}' >> $GITHUB_OUTPUT
+          else
+            echo 'K_LEVEL=3' >> $GITHUB_OUTPUT
+          fi 
+      
+      - name: Push new anonymized data
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          POSTGRES_HOST:                   traceit-01-i.comp.nus.edu.sg
+          POSTGRES_PORT:                   5432
+          POSTGRES_USER:                   "${{ steps.anonymize-secrets.outputs.POSTGRES_USER }}"
+          POSTGRES_PASSWORD:               "${{ steps.anonymize-secrets.outputs.POSTGRES_PASSWORD }}"
+
+          POSTGRES_RESEARCH_HOST:          traceit-01-i.comp.nus.edu.sg
+          POSTGRES_RESEARCH_PORT:          5432
+          POSTGRES_RESEARCH_USER:          "${{ steps.anonymize-secrets.outputs.POSTGRES_RESEARCH_USER }}"
+          POSTGRES_RESEARCH_PASSWORD:      "${{ steps.anonymize-secrets.outputs.POSTGRES_RESEARCH_PASSWORD }}"
+
+          PAT: ${{ secrets.PAT }}
+
+          K: ${{ steps.k-level.outputs.K_LEVEL }}
+        with:
+          playbook: playbooks/populate_research.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+  anonymize-dev:
     runs-on: cd-test
     container: 
       image: willhallonline/ansible:2.12-ubuntu-20.04
-      # options: --dns 137.132.90.2 --dns 137.132.85.2 --dns 8.8.8.8
       options: --dns 192.168.1.101 --dns 8.8.8.8
       volumes:
         - /usr/local/share/ca-certificates/traceit-ca.crt:/traceit-ca.crt
@@ -43,8 +124,6 @@ jobs:
         id: secrets
         shell: bash
         run: |
-          # Assume production
-          # echo 'VAULT_TOKEN=${{ secrets.VAULT_TOKEN_PROD }}' >> $GITHUB_OUTPUT
           echo 'VAULT_TOKEN=${{ secrets.VAULT_TOKEN_DEV }}' >> $GITHUB_OUTPUT
 
           echo "VAULT_CACERT=$(cat /traceit-ca.crt | base64 -w0)" >> $GITHUB_OUTPUT
