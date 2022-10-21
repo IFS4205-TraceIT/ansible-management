@@ -76,6 +76,8 @@ jobs:
           POSTGRES_RESEARCH_PASSWORD:      "${{ steps.anonymize-secrets.outputs.POSTGRES_RESEARCH_PASSWORD }}"
 
           PAT: ${{ secrets.PAT }}
+
+          K: ${{ secrets.K }}
         with:
           playbook: playbooks/populate_research.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}

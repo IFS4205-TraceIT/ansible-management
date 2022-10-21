@@ -74,7 +74,7 @@
         chdir: /home/anonymize/repo
       ansible.builtin.shell: |
         export PATH=/home/anonymize/.local/bin:$PATH
-        poetry run python generate_anon_data.py --k 3
+        poetry run python generate_anon_data.py --k {{ lookup('ansible.builtin.env', 'K') }}
       environment:
         # PostgreSQL
         POSTGRES_HOST:              "{{ lookup('ansible.builtin.env', 'POSTGRES_HOST') }}"
