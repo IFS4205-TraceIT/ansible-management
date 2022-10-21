@@ -6,7 +6,7 @@ jobs:
   deploy:
     runs-on: ci
     container: 
-      image: willhallonline/ansible:2.12-ubuntu-20.04
+      image: linuxserver/openssh-server
       options: --dns 137.132.90.2 --dns 137.132.85.2 --dns 8.8.8.8
       volumes:
         - /usr/local/share/ca-certificates/traceit-ca.crt:/traceit-ca.crt
@@ -20,7 +20,7 @@ jobs:
     - name: Install curl
       run: |
         apt-get update
-        DEBIAN_FRONTEND=noninteractive apt-get install -y curl unzip openssh-server
+        apt-get install -y curl unzip
         
     - name: Setup tunnel
       uses: joshlarsen/ssh-tunnel-action@main
