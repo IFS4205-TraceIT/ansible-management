@@ -20,7 +20,7 @@ jobs:
     - name: Install curl
       run: |
         apt-get update
-        apt-get install -y curl unzip
+        apt-get install -y curl unzip openssh-server
         
     - name: Setup tunnel
       uses: joshlarsen/ssh-tunnel-action@main
