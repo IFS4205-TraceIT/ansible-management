@@ -4,7 +4,7 @@ on:
     inputs:
       k_level:
         type: number
-        description: What K-anonymity level would you like to use?
+        description: What K-anonymity level would you like to use? (Defaults to 3)
 
   schedule:
     # Set to run everyday at 12am SGT = 4pm UTC
