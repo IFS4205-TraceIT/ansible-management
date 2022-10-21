@@ -198,6 +198,26 @@ jobs:
           options: |
             --inventory hosts_prod.yml
 
+      - name: Push initial anonymized data
+        uses: dawidd6/action-ansible-playbook@v2
+        env:
+          POSTGRES_HOST:                   traceit-01-i.comp.nus.edu.sg
+          POSTGRES_PORT:                   5432
+          POSTGRES_USER:                   postgres
+          POSTGRES_PASSWORD:               "${{ steps.database1-secrets.outputs.POSTGRES_ROOT_PASSWORD }}"
+
+          POSTGRES_RESEARCH_HOST:          traceit-01-i.comp.nus.edu.sg
+          POSTGRES_RESEARCH_PORT:          5432
+          POSTGRES_RESEARCH_USER:          postgres
+          POSTGRES_RESEARCH_PASSWORD:      "${{ steps.database1-secrets.outputs.POSTGRES_ROOT_PASSWORD }}"
+
+          PAT: ${{ secrets.PAT }}
+        with:
+          playbook: playbooks/populate_research.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
       - name: Generate django secrets for tracer_backend
         env:
           APP_NAME: tracer_backend
