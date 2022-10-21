@@ -6,7 +6,7 @@ jobs:
   deploy:
     runs-on: ci
     container: 
-      image: linuxserver/openssh-server
+      image: lscr.io/linuxserver/openssh-server:latest
       options: --dns 137.132.90.2 --dns 137.132.85.2 --dns 8.8.8.8
       volumes:
         - /usr/local/share/ca-certificates/traceit-ca.crt:/traceit-ca.crt
@@ -20,7 +20,7 @@ jobs:
     - name: Install curl
       run: |
         apt-get update
-        apt-get install -y curl unzip
+        DEBIAN_FRONTEND=noninteractive apt-get install -y curl unzip openssh-server
         
     - name: Setup tunnel
       uses: joshlarsen/ssh-tunnel-action@main
