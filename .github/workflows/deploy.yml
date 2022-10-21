@@ -430,6 +430,22 @@ jobs:
         env:
           VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
           VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
+      
+      - name: Harden hosts
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/harden_hosts.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Configure firewall rules
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/deploy_firewall.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
 
       - name: Send alert to Telegram chat
         if: inputs.deploy_environment == 'prod'
