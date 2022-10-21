@@ -1,21 +1,5 @@
-- name: Configure CI/CD VM 5
-  hosts: traceit-05-i.comp.nus.edu.sg
-  become: yes
-  
-  task:
-    - name: Enable firewall and disable all connections
-      ufw:
-        state: enabled
-        policy: rejected
-
-    - name: Enable ssh 
-      ufw:
-        rule: allow
-        port: ssh
-
-
-- name: Configure ssh for the remaining VMs
-  hosts: all:!traceit-05-i.comp.nus.edu.sg
+- name: Configure ssh for all VMs
+  hosts: all
   become: yes
 
   task:
@@ -24,7 +8,7 @@
         state: enabled
         policy: rejected
 
-    - name: Enable ssh only for VM 5
+    - name: Enable ssh access only for VM 5
       ufw:
         rule: allow
         port: ssh
@@ -70,9 +54,14 @@
   become: yes
 
   task:
-    - name: Allow Web Applications to connect to vault
+    - name: Allow other applications to communicate to vault
       ufw:
         rule: allow
         port: '8200'
         from: "{{ lookup('dig', item) }}"
-      with_items: "{{ groups['django'] }}"
+      loop:
+        - traceit-01-i.comp.nus.edu.sg
+        - traceit-02-i.comp.nus.edu.sg
+        - traceit-03-i.comp.nus.edu.sg
+        - traceit-05-i.comp.nus.edu.sg
+        - traceit-07-i.comp.nus.edu.sg
