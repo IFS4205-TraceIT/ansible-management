@@ -16,7 +16,12 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-      
+
+    - name: Install curl
+      run: |
+        apt-get update
+        apt-get install -y curl
+        
     - name: Setup tunnel
       uses: joshlarsen/ssh-tunnel-action@main
       with:
