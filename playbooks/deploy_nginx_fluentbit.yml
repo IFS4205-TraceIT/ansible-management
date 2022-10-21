@@ -1,0 +1,38 @@
+- name: Deploy Fluent Bit to proxy hosts
+  hosts: nginx
+  gather_facts: no
+  become: yes # Sudo as root
+
+  vars:
+    loki_passwd: "{{ lookup('env', 'LOKI_PASSWD') }}"
+
+  tasks:
+
+    - name: Update apt repository cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+    
+    - name: Install curl
+      ansible.builtin.apt:
+        name: curl
+        state: present
+      
+    - name: Install Fluent Bit
+    ansible.builtin.shell:
+      cmd: curl https://raw.githubusercontent.com/fluent/fluent-bit/master/install.sh | sh
+      
+    - name: Copy Fluent Bit config file
+      ansible.builtin.template:
+        src: fluent-bit.conf.j2
+        dest: /etc/fluent-bit/fluent-bit.conf
+        owner: root
+        group: root
+        mode: 0644
+        backup: yes
+    
+    - name: Start Fluent Bit
+      ansible.builtin.service:
+        name: fluent-bit
+        state: started
+        enabled: yes
