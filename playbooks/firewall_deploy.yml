@@ -53,8 +53,8 @@
         - traceit-03-i.comp.nus.edu.sg
         - traceit-07-i.comp.nus.edu.sg
 
-- name: Configure Ngnix on VM 4
-  hosts: ngnix
+- name: Configure Nginx on VM 4
+  hosts: nginx
   become: yes
 
   task:
@@ -62,11 +62,6 @@
       ufw:
         rule: allow
         port: '80'
-
-    - name: Allow HTTPS Traffic
-      ufw:
-        rule: allow
-        port: '443'
 
 # Configure VM 6 not done because grafana loki host unknown src
 
@@ -80,4 +75,4 @@
         rule: allow
         port: '8200'
         from: "{{ lookup('dig', item) }}"
-      with_items: "{{groups['django']}}"
+      with_items: "{{ groups['django'] }}"
