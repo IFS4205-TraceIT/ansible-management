@@ -1,12 +1,13 @@
 - name: Configure CI/CD VM 5
   hosts: traceit-05-i.comp.nus.edu.sg
   become: yes
+  gather_facts: no
 
   tasks:
     - name: Enable firewall and disable all connections
       ufw:
         state: enabled
-        policy: rejected
+        policy: reject
 
     - name: Enable ssh 
       ufw:
@@ -17,12 +18,13 @@
 - name: Configure ssh for the remaining VMs
   hosts: all:!traceit-05-i.comp.nus.edu.sg
   become: yes
+  gather_facts: no
 
   tasks:
     - name: Enable firewall and disable all connections
       ufw:
         state: enabled
-        policy: rejected
+        policy: reject
 
     - name: Enable ssh access only for VM 5
       ufw:
@@ -34,6 +36,7 @@
 - name: Configure web application for VMs 1,2,3
   hosts: django
   become: yes
+  gather_facts: no
 
   tasks:
     - name: Enable Django port
@@ -51,11 +54,13 @@
         - traceit-01-i.comp.nus.edu.sg
         - traceit-02-i.comp.nus.edu.sg
         - traceit-03-i.comp.nus.edu.sg
+        - traceit-05-i.comp.nus.edu.sg
         - traceit-07-i.comp.nus.edu.sg
 
 - name: Configure Nginx on VM 4
   hosts: nginx
   become: yes
+  gather_facts: no
 
   tasks:
     - name: Allow HTTP Traffic
@@ -68,6 +73,7 @@
 - name: Configure Vault on VM 7
   hosts: vault
   become: yes
+  gather_facts: no
 
   tasks:
     - name: Allow other applications to communicate to vault
@@ -79,5 +85,6 @@
         - traceit-01-i.comp.nus.edu.sg
         - traceit-02-i.comp.nus.edu.sg
         - traceit-03-i.comp.nus.edu.sg
+        - traceit-04-i.comp.nus.edu.sg
         - traceit-05-i.comp.nus.edu.sg
         - traceit-07-i.comp.nus.edu.sg
