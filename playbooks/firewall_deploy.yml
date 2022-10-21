@@ -1,5 +1,21 @@
-- name: Configure ssh for all VMs
-  hosts: all
+- name: Configure CI/CD VM 5
+  hosts: traceit-05-i.comp.nus.edu.sg
+  become: yes
+
+  task:
+    - name: Enable firewall and disable all connections
+      ufw:
+        state: enabled
+        policy: rejected
+
+    - name: Enable ssh 
+      ufw:
+        rule: allow
+        port: ssh
+
+
+- name: Configure ssh for the remaining VMs
+  hosts: all:!traceit-05-i.comp.nus.edu.sg
   become: yes
 
   task:
