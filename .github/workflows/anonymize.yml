@@ -1,6 +1,12 @@
 name: Push anonymized data
 on:
   workflow_dispatch:
+    inputs:
+      k_level:
+        type: number
+        description: What K-anonymity level would you like to use?
+        required: true
+
   schedule:
     # Set to run everyday at 12am SGT = 4pm UTC
     - cron: "0 16 * * *"
@@ -61,6 +67,16 @@ jobs:
           caCertificate: ${{ steps.secrets.outputs.VAULT_CACERT }}
           clientCertificate: ${{ steps.secrets.outputs.VAULT_CLIENTCERT }}
           clientKey: ${{ steps.secrets.outputs.VAULT_CLIENTKEY }}
+
+      - name: Determine K-anonymity level
+        id: k-level
+        shell: bash
+        run: |
+          if [[ "${{ inputs.k_level }}" != "" ]]; then
+            echo 'K_LEVEL=${{ inputs.k_level }}' >> $GITHUB_OUTPUT
+          else
+            echo 'K_LEVEL=3' >> $GITHUB_OUTPUT
+          fi 
       
       - name: Push new anonymized data
         uses: dawidd6/action-ansible-playbook@v2
@@ -77,7 +93,7 @@ jobs:
 
           PAT: ${{ secrets.PAT }}
 
-          K: ${{ secrets.K }}
+          K: ${{ steps.k-level.outputs.K_LEVEL }}
         with:
           playbook: playbooks/populate_research.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}

@@ -215,7 +215,7 @@ jobs:
 
           PAT: ${{ secrets.PAT }}
 
-          K: ${{ secrets.K }}
+          K: 3
         with:
           playbook: playbooks/populate_research.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}

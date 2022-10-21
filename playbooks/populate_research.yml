@@ -67,6 +67,11 @@
         poetry config --local virtualenvs.options.no-pip true
         poetry install --no-interaction
 
+    - name: Print K level
+      debug:
+        msg:
+          - "K-Anonymity Level: {{ lookup('ansible.builtin.env', 'K') }}"
+
     - name: Push anonymized data
       become: yes
       become_user: anonymize
