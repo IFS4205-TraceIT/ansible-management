@@ -192,6 +192,8 @@ jobs:
           PAT: ${{ secrets.PAT }}
           VAULT_TOKEN:            "${{ steps.secrets.outputs.VAULT_TOKEN }}"
           VAULT_ADDR:              https://traceit-07-i.comp.nus.edu.sg:8200
+
+          DB_HOSTS: traceit-01-i.comp.nus.edu.sg
         with:
           playbook: playbooks/populate_postgres.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
