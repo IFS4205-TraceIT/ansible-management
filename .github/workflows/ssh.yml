@@ -21,6 +21,7 @@ jobs:
       run: |
         apt-get update
         DEBIAN_FRONTEND=noninteractive apt-get install -y curl unzip openssh-server
+        echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
         service ssh start
         
     - name: Setup tunnel
