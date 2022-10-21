@@ -58,6 +58,10 @@ jobs:
 
       - name: Clone repo
         uses: actions/checkout@v3
+
+      - name: Install dnspython
+        run: |
+          pip install dnspython
       
       - name: Retrieve relevant secrets
         id: secrets

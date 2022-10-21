@@ -38,6 +38,6 @@
         name: "{{ item }}"
       loop:
         - hvac
-        - dnspython
+
 
     
