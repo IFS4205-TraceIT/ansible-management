@@ -60,7 +60,7 @@ jobs:
           token: ${{ steps.secrets.outputs.VAULT_TOKEN }}
           secrets: |
               database/creds/maindb_readwrite username | POSTGRES_USER;
-              database/creds/maindb_readwrite password | POSTGRESPASSWORD;
+              database/creds/maindb_readwrite password | POSTGRES_PASSWORD;
               database/creds/researchsdb_readwrite username | POSTGRES_RESEARCH_USER;
               database/creds/researchsdb_readwrite password | POSTGRES_RESEARCH_PASSWORD;
           exportEnv: false
