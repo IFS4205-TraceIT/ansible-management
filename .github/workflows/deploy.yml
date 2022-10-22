@@ -337,6 +337,7 @@ jobs:
           POSTGRES_USER:          "${{ steps.tracer_backend-secrets.outputs.POSTGRES_USER }}"
           POSTGRES_PASSWORD:      "${{ steps.tracer_backend-secrets.outputs.POSTGRES_PASSWORD }}"
 
+          LOKI_PASSWD:            ${{ secrets.LOKI_PASSWD }}
         with:
           playbook: playbooks/deploy_django.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -367,6 +368,7 @@ jobs:
           POSTGRES_RESEARCH_USER:          "${{ steps.research_backend-secrets.outputs.POSTGRES_RESEARCH_USER }}"
           POSTGRES_RESEARCH_PASSWORD:      "${{ steps.research_backend-secrets.outputs.POSTGRES_RESEARCH_PASSWORD }}"
 
+          LOKI_PASSWD:            ${{ secrets.LOKI_PASSWD }}
         with:
           playbook: playbooks/deploy_django.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -396,6 +398,8 @@ jobs:
           POSTGRES_DB:            maindb
           POSTGRES_USER:          "${{ steps.contact_backend-secrets.outputs.POSTGRES_USER }}"
           POSTGRES_PASSWORD:      "${{ steps.contact_backend-secrets.outputs.POSTGRES_PASSWORD }}"
+
+          LOKI_PASSWD:            ${{ secrets.LOKI_PASSWD }}
         with:
           playbook: playbooks/deploy_django.yml
           key: ${{ secrets.SSH_PRIVATE_KEY }}
