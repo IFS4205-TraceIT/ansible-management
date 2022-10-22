@@ -20,6 +20,19 @@
         state: absent
         path: /var/www/research
 
+    - name: Find log files
+      ansible.builtin.find:
+        paths: "/var/log/nginx"
+        hidden: True
+        recurse: True
+      register: collected_files
+    
+    - name: Delete logs
+      ansible.builtin.file:
+        state: absent
+        path: "{{ item.path }}"
+      with_items: "{{ collected_files.files }}"
+
     - name: Remove cert
       ansible.builtin.file:
         state: absent
