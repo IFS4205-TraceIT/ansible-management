@@ -447,8 +447,18 @@ jobs:
           options: |
             --inventory hosts_prod.yml
 
+      - name: Check if Telegram secrets are set
+        id: telegram
+        shell: bash
+        run: |
+          if [[ "${{ secrets.TELEGRAM_TO }}" != "" && "${{ secrets.TELEGRAM_TOKEN }}" != "" ]]; then
+            echo 'ENABLED=true' >> $GITHUB_OUTPUT
+          else
+            echo 'ENABLED=false' >> $GITHUB_OUTPUT
+          fi
+
       - name: Send alert to Telegram chat
-        if: inputs.deploy_environment == 'prod'
+        if: inputs.deploy_environment == 'prod' && steps.telegram.outputs.ENABLED == 'true'
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
