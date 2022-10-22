@@ -58,6 +58,10 @@ jobs:
 
       - name: Clone repo
         uses: actions/checkout@v3
+
+      - name: Install dnspython
+        run: |
+          pip install dnspython
       
       - name: Retrieve relevant secrets
         id: secrets
@@ -426,7 +430,7 @@ jobs:
         env:
           VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
           VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
-      
+
       - name: Deploy Fluent Bit
         uses: dawidd6/action-ansible-playbook@v2
         with:
@@ -437,8 +441,34 @@ jobs:
         env:
           LOKI_PASSWD: ${{ secrets.LOKI_PASSWD }}
 
+      - name: Harden hosts
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/harden_hosts.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Configure firewall rules
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/deploy_firewall.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Check if Telegram secrets are set
+        id: telegram
+        shell: bash
+        run: |
+          if [[ "${{ secrets.TELEGRAM_TO }}" != "" && "${{ secrets.TELEGRAM_TOKEN }}" != "" ]]; then
+            echo 'ENABLED=true' >> $GITHUB_OUTPUT
+          else
+            echo 'ENABLED=false' >> $GITHUB_OUTPUT
+          fi
+
       - name: Send alert to Telegram chat
-        if: inputs.deploy_environment == 'prod'
+        if: inputs.deploy_environment == 'prod' && steps.telegram.outputs.ENABLED == 'true'
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
