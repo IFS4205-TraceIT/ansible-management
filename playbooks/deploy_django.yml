@@ -128,5 +128,7 @@
         POSTGRES_RESEARCH_SSL_ROOT_CERT: /usr/local/share/ca-certificates/traceit-ca.crt
         POSTGRES_RESEARCH_SSL_CERT:      /home/django/repo/server.crt
         POSTGRES_RESEARCH_SSL_KEY:       /home/django/repo/server.key
+
+        LOKI_PASSWD:                     "{{ lookup('ansible.builtin.env', 'LOKI_PASSWD') }}"
       register: gunicorn_output
     - debug: msg={{ gunicorn_output }}
