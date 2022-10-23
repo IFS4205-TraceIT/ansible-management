@@ -97,7 +97,7 @@
         DJANGO_DEBUG: False
         # Vault
         VAULT_ADDR: "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}"
-        VAULT_TOKEN: "{{ totp_token.stdout }}"
+        VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
         VAULT_ROOT_CA_FILE: /usr/local/share/ca-certificates/traceit-ca.crt
         VAULT_CLIENT_CERT_FILE: /home/django/repo/server.crt
         VAULT_CLIENT_KEY_FILE: /home/django/repo/server.key
