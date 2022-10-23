@@ -46,6 +46,7 @@
           - vault
           - secrets
           - enable
+          - -path=secret
           - kv-v2
       ignore_errors: yes
     
@@ -68,7 +69,7 @@
           - pki
       ignore_errors: yes
 
-    - name: Generate TOTP policy
+    - name: Generate totp-only policy
       ansible.builtin.shell: |
         vault policy write totp-only - <<EOF
         path "totp/keys/*" {
@@ -76,5 +77,13 @@
         }
         path "totp/code/*" {
           capabilities = ["create", "read", "update", "delete"]
+        }
+        EOF
+
+    - name: Generate tempid-only policy
+      ansible.builtin.shell: |
+        vault policy write tempid-only - <<EOF
+        path "secret/contacts/temp_id_key" {
+          capabilities = ["create", "read", "update"]
         }
         EOF
