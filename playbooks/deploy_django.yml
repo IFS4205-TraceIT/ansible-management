@@ -66,22 +66,22 @@
         src: /home/django/server.key
         remote_src: yes
 
-    - name: Generate TOTP-only token
-      delegate_to: traceit-07-i.comp.nus.edu.sg
-      ansible.builtin.command:
-        argv:
-          - vault
-          - token
-          - create
-          - -policy=totp-only
-          - -field=token
-      environment:
-        VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
-        VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
-        VAULT_CLIENT_CERT: /home/vault/server.crt
-        VAULT_CLIENT_KEY: /home/vault/server.key
-        VAULT_CACERT: /usr/local/share/ca-certificates/traceit-ca.crt
-      register: totp_token
+    # - name: Generate TOTP-only token
+    #   delegate_to: traceit-07-i.comp.nus.edu.sg
+    #   ansible.builtin.command:
+    #     argv:
+    #       - vault
+    #       - token
+    #       - create
+    #       - -policy=totp-only
+    #       - -field=token
+    #   environment:
+    #     VAULT_TOKEN: "{{ lookup('ansible.builtin.env', 'VAULT_TOKEN') }}"
+    #     VAULT_ADDR: "https://traceit-07-i.comp.nus.edu.sg:8200"
+    #     VAULT_CLIENT_CERT: /home/vault/server.crt
+    #     VAULT_CLIENT_KEY: /home/vault/server.key
+    #     VAULT_CACERT: /usr/local/share/ca-certificates/traceit-ca.crt
+    #   register: totp_token
 
     - name: Run gunicorn in daemon mode
       become: yes
