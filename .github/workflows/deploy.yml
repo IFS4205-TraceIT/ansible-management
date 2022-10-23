@@ -434,7 +434,17 @@ jobs:
         env:
           VAULT_TOKEN: ${{ steps.secrets.outputs.VAULT_TOKEN }}
           VAULT_ADDR: https://traceit-07-i.comp.nus.edu.sg:8200
-      
+
+      - name: Deploy Fluent Bit
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/deploy_nginx_fluentbit.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+        env:
+          LOKI_PASSWD: ${{ secrets.LOKI_PASSWD }}
+
       - name: Harden hosts
         uses: dawidd6/action-ansible-playbook@v2
         with:
