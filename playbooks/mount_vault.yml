@@ -67,3 +67,14 @@
           - -path=pki_int
           - pki
       ignore_errors: yes
+
+    - name: Generate TOTP policy
+      ansible.builtin.shell: |
+        vault policy write totp-only - <<EOF
+        path "totp/keys/*" {
+          capabilities = ["create", "read", "update", "delete"]
+        }
+        path "totp/code/*" {
+          capabilities = ["create", "read", "update", "delete"]
+        }
+        EOF
