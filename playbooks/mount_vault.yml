@@ -83,7 +83,7 @@
     - name: Generate tempid-only policy
       ansible.builtin.shell: |
         vault policy write tempid-only - <<EOF
-        path "secret/contacts/temp_id_key" {
+        path "secret/data/contacts/temp_id_key" {
           capabilities = ["create", "read", "update"]
         }
         EOF
