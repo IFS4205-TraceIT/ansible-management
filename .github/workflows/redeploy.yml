@@ -102,7 +102,7 @@ jobs:
       #           Reverse Proxy            #
       ######################################
 
-      - name: Teardown reverse proxy if it is down
+      - name: Teardown reverse proxy
         if: steps.proxy-status.outputs.DOWN
         uses: dawidd6/action-ansible-playbook@v2
         with:
