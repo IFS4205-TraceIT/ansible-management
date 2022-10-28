@@ -1,4 +1,4 @@
-name: Redeploy
+name: Redeploy service
 on:
   schedule:
     # Set to run every 30th minute
@@ -15,6 +15,7 @@ on:
         - research
         - contact
         - proxy
+        - all
 
 jobs:
   redeploy:
@@ -39,6 +40,13 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v3        
       
-      - name: Print stuff
+      - name: curl
+        continue-on-error: true
+        id: test-request
+        uses: wei/curl@master
+        with:
+          args: -sSf --max-time 10 -I http://traceit-04-i.comp.nus.edu.sg/ 
+
+      - name: Get output
         run: |
-          echo "${{ inputs.service_name }}"
+          echo "${{ join(steps.test-request.outputs.*, '\n') }}"
