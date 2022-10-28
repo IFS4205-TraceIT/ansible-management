@@ -5,17 +5,17 @@ on:
     - cron: '*/30 * * * *' 
 
   workflow_dispatch:
-    inputs:
-      service_name:
-        type: choice
-        description: Which service would you like to redeploy?
-        required: true
-        options: 
-        - tracer
-        - research
-        - contact
-        - proxy
-        - all
+    # inputs:
+    #   service_name:
+    #     type: choice
+    #     description: Which service would you like to redeploy?
+    #     required: true
+    #     options: 
+    #     - tracer
+    #     - research
+    #     - contact
+    #     - proxy
+    #     - all
 
 jobs:
   redeploy:
@@ -40,13 +40,32 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v3        
       
-      - name: curl
-        continue-on-error: true
-        id: test-request
-        uses: wei/curl@master
-        with:
-          args: -sSf --max-time 10 -I http://traceit-04-i.comp.nus.edu.sg/ 
-
-      - name: Get output
+      - name: Install curl
         run: |
-          echo "${{ join(steps.test-request.outputs.*, '\n') }}"
+          apt-get update
+          apt-get install -y curl
+      
+      - name: Check if reverse proxy is down
+        if: inputs.service_name == '' # If scheduled
+        id: proxy-status
+        run: |
+          STATUSCODE=$(curl --silent --output /dev/stderr --max-time 10 --write-out "%{http_code}"  http://traceit-04-i.comp.nus.edu.sg/)
+          echo "STATUSCODE=$STATUSCODE" >> $GITHUB_OUTPUT
+
+      - name: Teardown reverse proxy if it is down, proxy is selected or all are selected
+        if: steps.proxy-status.outputs.STATUSCODE == '000'
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/teardown_nginx.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
+
+      - name: Deploy proxy
+        if: steps.proxy-status.outputs.STATUSCODE == '000'
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbooks/deploy_nginx.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: |
+            --inventory hosts_prod.yml
