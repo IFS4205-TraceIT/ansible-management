@@ -1,0 +1,44 @@
+name: Redeploy
+on:
+  schedule:
+    # Set to run every 30th minute
+    - cron: '*/30 * * * *' 
+
+  workflow_dispatch:
+    inputs:
+      service_name:
+        type: choice
+        description: Which service would you like to redeploy?
+        required: true
+        options: 
+        - tracer
+        - research
+        - contact
+        - proxy
+
+jobs:
+  redeploy:
+
+    concurrency: dev
+    runs-on: cd-test
+    container: 
+      image: willhallonline/ansible:2.12-ubuntu-20.04
+      options: --dns 192.168.1.101 --dns 8.8.8.8
+      volumes:
+        - /usr/local/share/ca-certificates/traceit-ca.crt:/traceit-ca.crt
+        - /home/cicd/server.crt:/server.crt
+        - /home/cicd/server.key:/server.key
+
+    steps:
+
+      - name: Cleanup folder
+        run: |
+          rm -rf ./* || true
+          rm -rf ./.??* || true
+
+      - name: Clone repository
+        uses: actions/checkout@v3        
+      
+      - name: Print stuff
+        run: |
+          echo "${{ inputs.service_name }}"
