@@ -105,6 +105,8 @@
         POSTGRES_RESEARCH_SSL_ROOT_CERT: /usr/local/share/ca-certificates/traceit-ca.crt
         POSTGRES_RESEARCH_SSL_CERT:      /home/django/server.crt
         POSTGRES_RESEARCH_SSL_KEY:       /home/django/server.key
+
+        DJANGO_SECRET_KEY: "{{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,ascii_uppercase,digits length=32') }}"
       register: migrations
     - debug: msg={{ migrations.stdout_lines }}
 
