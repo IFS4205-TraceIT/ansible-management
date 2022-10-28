@@ -62,7 +62,7 @@ jobs:
         id: proxy-status
         shell: bash
         run: |
-          STATUSCODE=$(curl -I --silent --output /dev/stderr --max-time 10 --write-out "%{http_code}"  http://traceit-04-i.comp.nus.edu.sg/)
+          STATUSCODE=$(curl -I --silent --output /dev/stderr --max-time 10 --write-out "%{http_code}"  http://traceit-04-i.comp.nus.edu.sg/ || true)
           if [[ "$STATUSCODE" == "000" ]]; then
             echo 'DOWN=true' >> $GITHUB_OUTPUT
           else
@@ -73,7 +73,7 @@ jobs:
         id: tracer-status
         shell: bash
         run: |
-          STATUSCODE=$(curl -I --silent --output /dev/stderr --max-time 10 --write-out "%{http_code}"  http://traceit-04-i.comp.nus.edu.sg/tracer/api/)
+          STATUSCODE=$(curl -I --silent --output /dev/stderr --max-time 10 --write-out "%{http_code}"  http://traceit-04-i.comp.nus.edu.sg/tracer/api/ || true)
           if [[ "$STATUSCODE" == "502" ]]; then
             echo 'DOWN=true' >> $GITHUB_OUTPUT
           else
@@ -84,7 +84,7 @@ jobs:
         id: research-status
         shell: bash
         run: |
-          STATUSCODE=$(curl -I --silent --output /dev/stderr --max-time 10 --write-out "%{http_code}"  http://traceit-04-i.comp.nus.edu.sg/research/api/)
+          STATUSCODE=$(curl -I --silent --output /dev/stderr --max-time 10 --write-out "%{http_code}"  http://traceit-04-i.comp.nus.edu.sg/research/api/ || true)
           if [[ "$STATUSCODE" == "502" ]]; then
             echo 'DOWN=true' >> $GITHUB_OUTPUT
           else
@@ -95,7 +95,7 @@ jobs:
         id: contact-status
         shell: bash
         run: |
-          STATUSCODE=$(curl -I --silent --output /dev/stderr --max-time 10 --write-out "%{http_code}"  http://traceit-04-i.comp.nus.edu.sg/contact/api/)
+          STATUSCODE=$(curl -I --silent --output /dev/stderr --max-time 10 --write-out "%{http_code}"  http://traceit-04-i.comp.nus.edu.sg/contact/api/ || true)
           if [[ "$STATUSCODE" == "502" ]]; then
             echo 'DOWN=true' >> $GITHUB_OUTPUT
           else
