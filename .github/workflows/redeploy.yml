@@ -107,7 +107,7 @@ jobs:
       ######################################
 
       - name: Teardown reverse proxy
-        if: steps.proxy-status.outputs.DOWN
+        if: steps.proxy-status.outputs.DOWN == 'true'
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: playbooks/teardown_nginx.yml
@@ -134,7 +134,7 @@ jobs:
           target: playbooks/files/research-frontend.tar.gz
         
       - name: Deploy proxy
-        if: steps.proxy-status.outputs.DOWN
+        if: steps.proxy-status.outputs.DOWN == 'true'
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: playbooks/deploy_nginx.yml
@@ -147,7 +147,7 @@ jobs:
       ######################################
 
       - name: Teardown tracer_backend
-        if: steps.tracer-status.outputs.DOWN
+        if: steps.tracer-status.outputs.DOWN == 'true'
         uses: dawidd6/action-ansible-playbook@v2
         env:
           APP_HOSTS: traceit-01-i.comp.nus.edu.sg
@@ -158,7 +158,7 @@ jobs:
             --inventory hosts_prod.yml
       
       - name: Get tracer_backend secrets from Vault
-        if: steps.tracer-status.outputs.DOWN
+        if: steps.tracer-status.outputs.DOWN == 'true'
         uses: hashicorp/vault-action@v2.4.0
         id: tracer_backend-secrets
         with:
@@ -176,7 +176,7 @@ jobs:
           clientKey: ${{ steps.secrets.outputs.VAULT_CLIENTKEY }}
 
       - name: Deploy tracer_backend
-        if: steps.tracer-status.outputs.DOWN
+        if: steps.tracer-status.outputs.DOWN == 'true'
         uses: dawidd6/action-ansible-playbook@v2
         env:
           APP_HOSTS: traceit-01-i.comp.nus.edu.sg
@@ -212,7 +212,7 @@ jobs:
       ######################################
 
       - name: Teardown research_backend
-        if: steps.research-status.outputs.DOWN
+        if: steps.research-status.outputs.DOWN == 'true'
         uses: dawidd6/action-ansible-playbook@v2
         env:
           APP_HOSTS: traceit-02-i.comp.nus.edu.sg
@@ -223,7 +223,7 @@ jobs:
             --inventory hosts_prod.yml
       
       - name: Get research_backend secrets from Vault
-        if: steps.research-status.outputs.DOWN
+        if: steps.research-status.outputs.DOWN == 'true'
         uses: hashicorp/vault-action@v2.4.0
         id: research_backend-secrets
         with:
@@ -241,7 +241,7 @@ jobs:
           clientKey: ${{ steps.secrets.outputs.VAULT_CLIENTKEY }}
       
       - name: Deploy research_backend
-        if: steps.research-status.outputs.DOWN
+        if: steps.research-status.outputs.DOWN == 'true'
         uses: dawidd6/action-ansible-playbook@v2
         env:
           APP_HOSTS: traceit-02-i.comp.nus.edu.sg
@@ -277,7 +277,7 @@ jobs:
       ######################################
 
       - name: Teardown contact_backend
-        if: steps.contact-status.outputs.DOWN
+        if: steps.contact-status.outputs.DOWN == 'true'
         uses: dawidd6/action-ansible-playbook@v2
         env:
           APP_HOSTS: traceit-03-i.comp.nus.edu.sg
@@ -288,7 +288,7 @@ jobs:
             --inventory hosts_prod.yml
 
       - name: Get contact_backend secrets from Vault
-        if: steps.contact-status.outputs.DOWN
+        if: steps.contact-status.outputs.DOWN == 'true'
         uses: hashicorp/vault-action@v2.4.0
         id: contact_backend-secrets
         with:
@@ -306,7 +306,7 @@ jobs:
           clientKey: ${{ steps.secrets.outputs.VAULT_CLIENTKEY }}
 
       - name: Deploy contact_backend
-        if: steps.contact-status.outputs.DOWN
+        if: steps.contact-status.outputs.DOWN == 'true'
         uses: dawidd6/action-ansible-playbook@v2
         env:
           APP_HOSTS: traceit-03-i.comp.nus.edu.sg
