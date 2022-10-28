@@ -60,6 +60,7 @@ jobs:
       
       - name: Check if reverse proxy is down
         id: proxy-status
+        shell: bash
         run: |
           STATUSCODE=$(curl -I --silent --output /dev/stderr --max-time 10 --write-out "%{http_code}"  http://traceit-04-i.comp.nus.edu.sg/)
           if [[ "$STATUSCODE" == "000" ]]; then
@@ -70,6 +71,7 @@ jobs:
       
       - name: Check if tracer API is down
         id: tracer-status
+        shell: bash
         run: |
           STATUSCODE=$(curl -I --silent --output /dev/stderr --max-time 10 --write-out "%{http_code}"  http://traceit-04-i.comp.nus.edu.sg/tracer/api/)
           if [[ "$STATUSCODE" == "502" ]]; then
@@ -80,6 +82,7 @@ jobs:
       
       - name: Check if research API is down
         id: research-status
+        shell: bash
         run: |
           STATUSCODE=$(curl -I --silent --output /dev/stderr --max-time 10 --write-out "%{http_code}"  http://traceit-04-i.comp.nus.edu.sg/research/api/)
           if [[ "$STATUSCODE" == "502" ]]; then
@@ -90,6 +93,7 @@ jobs:
       
       - name: Check if contact API is down
         id: contact-status
+        shell: bash
         run: |
           STATUSCODE=$(curl -I --silent --output /dev/stderr --max-time 10 --write-out "%{http_code}"  http://traceit-04-i.comp.nus.edu.sg/contact/api/)
           if [[ "$STATUSCODE" == "502" ]]; then
