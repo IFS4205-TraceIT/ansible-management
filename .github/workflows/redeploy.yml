@@ -68,6 +68,7 @@ jobs:
           else
             echo 'DOWN=false' >> $GITHUB_OUTPUT
           fi
+          sleep 10
       
       - name: Check if tracer API is down
         id: tracer-status
