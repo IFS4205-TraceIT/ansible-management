@@ -1,8 +1,8 @@
 name: Redeploy web services that are down
 on:
   schedule:
-    # Set to run every 30th minute
-    - cron: '*/30 * * * *' 
+    # Set to run at HH:00 and HH:30
+    - cron: '0,30 * * * *' 
 
   workflow_dispatch:
 
