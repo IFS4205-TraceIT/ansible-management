@@ -292,9 +292,9 @@ jobs:
               database/creds/researchsdb_readwrite username | POSTGRES_RESEARCH_USER;
               database/creds/researchsdb_readwrite password | POSTGRES_RESEARCH_PASSWORD;
           exportEnv: false
-          caCertificate: ${{ steps.secrets.outputs.VAULT_CACERT }}
-          clientCertificate: ${{ steps.secrets.outputs.VAULT_CLIENTCERT }}
-          clientKey: ${{ steps.secrets.outputs.VAULT_CLIENTKEY }}
+          caCertificate: "::add-mask::${{ steps.secrets.outputs.VAULT_CACERT }}"
+          clientCertificate: "::add-mask::${{ steps.secrets.outputs.VAULT_CLIENTCERT }}"
+          clientKey: "::add-mask::${{ steps.secrets.outputs.VAULT_CLIENTKEY }}"
       
       - name: Get contact_backend secrets from Vault
         uses: hashicorp/vault-action@v2.4.0
