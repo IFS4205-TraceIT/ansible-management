@@ -72,10 +72,18 @@ jobs:
           else
             echo 'VAULT_TOKEN=${{ secrets.VAULT_TOKEN_DEV }}' >> $GITHUB_OUTPUT
           fi
+          VAULT_CACERT=$(cat /traceit-ca.crt | base64 -w0)
+          VAULT_CLIENTCERT=$(cat /server.crt | base64 -w0)
+          VAULT_CLIENTKEY=$(cat /server.key | base64 -w0)
+          
+          # Redact Vault keys and certs
+          echo "::add-mask::$VAULT_CACERT"
+          echo "::add-mask::$VAULT_CLIENTCERT"
+          echo "::add-mask::$VAULT_CLIENTKEY"
 
-          echo "VAULT_CACERT=$(cat /traceit-ca.crt | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "VAULT_CLIENTCERT=$(cat /server.crt | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "VAULT_CLIENTKEY=$(cat /server.key | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "VAULT_CACERT=$VAULT_CACERT" >> $GITHUB_OUTPUT
+          echo "VAULT_CLIENTCERT=$VAULT_CLIENTCERT" >> $GITHUB_OUTPUT
+          echo "VAULT_CLIENTKEY=$VAULT_CLIENTKEY" >> $GITHUB_OUTPUT
 
       - name: Refresh certificates for django
         env:
@@ -292,9 +300,9 @@ jobs:
               database/creds/researchsdb_readwrite username | POSTGRES_RESEARCH_USER;
               database/creds/researchsdb_readwrite password | POSTGRES_RESEARCH_PASSWORD;
           exportEnv: false
-          caCertificate: "::add-mask::${{ steps.secrets.outputs.VAULT_CACERT }}"
-          clientCertificate: "::add-mask::${{ steps.secrets.outputs.VAULT_CLIENTCERT }}"
-          clientKey: "::add-mask::${{ steps.secrets.outputs.VAULT_CLIENTKEY }}"
+          caCertificate: "${{ steps.secrets.outputs.VAULT_CACERT }}"
+          clientCertificate: "${{ steps.secrets.outputs.VAULT_CLIENTCERT }}"
+          clientKey: "${{ steps.secrets.outputs.VAULT_CLIENTKEY }}"
       
       - name: Get contact_backend secrets from Vault
         uses: hashicorp/vault-action@v2.4.0
