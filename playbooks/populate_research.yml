@@ -56,6 +56,20 @@
         repo: "https://{{ lookup('ansible.builtin.env', 'PAT') }}@github.com/IFS4205-TraceIT/kanonymity"
         dest: /home/anonymize/repo
 
+    - name: Delete .git
+      become: yes
+      become_user: anonymize
+      ansible.builtin.file:
+        path: /home/anonymize/repo/.git
+        state: absent
+
+    - name: Delete README.md
+      become: yes
+      become_user: anonymize
+      ansible.builtin.file:
+        path: /home/anonymize/repo/README.md
+        state: absent
+
     - name: Install dependencies
       become: yes
       become_user: anonymize

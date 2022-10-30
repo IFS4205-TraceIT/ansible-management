@@ -56,6 +56,20 @@
         repo: "https://{{ lookup('ansible.builtin.env', 'PAT') }}@github.com/IFS4205-TraceIT/database-configurations"
         dest: /home/django/repo
 
+    - name: Delete .git
+      become: yes
+      become_user: django
+      ansible.builtin.file:
+        path: /home/django/repo/.git
+        state: absent
+
+    - name: Delete README.md
+      become: yes
+      become_user: django
+      ansible.builtin.file:
+        path: /home/django/repo/README.md
+        state: absent
+
     - name: Install dependencies
       become: yes
       become_user: django
