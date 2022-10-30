@@ -56,6 +56,17 @@
         repo: "https://{{ lookup('ansible.builtin.env', 'PAT') }}@github.com/IFS4205-TraceIT/database-configurations"
         dest: /home/django/repo
 
+    - name: Install dependencies
+      become: yes
+      become_user: django
+      args:
+        chdir: /home/django/repo
+      ansible.builtin.shell: |
+        export PATH=/home/django/.local/bin:$PATH
+        poetry config --local virtualenvs.options.no-setuptools false
+        poetry config --local virtualenvs.options.no-pip true
+        poetry install --no-interaction
+    
     - name: Delete .git
       become: yes
       become_user: django
@@ -69,17 +80,6 @@
       ansible.builtin.file:
         path: /home/django/repo/README.md
         state: absent
-
-    - name: Install dependencies
-      become: yes
-      become_user: django
-      args:
-        chdir: /home/django/repo
-      ansible.builtin.shell: |
-        export PATH=/home/django/.local/bin:$PATH
-        poetry config --local virtualenvs.options.no-setuptools false
-        poetry config --local virtualenvs.options.no-pip true
-        poetry install --no-interaction
 
     - name: Perform database migrations
       become: yes

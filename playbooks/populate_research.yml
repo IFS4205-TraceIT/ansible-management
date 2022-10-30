@@ -56,6 +56,17 @@
         repo: "https://{{ lookup('ansible.builtin.env', 'PAT') }}@github.com/IFS4205-TraceIT/kanonymity"
         dest: /home/anonymize/repo
 
+    - name: Install dependencies
+      become: yes
+      become_user: anonymize
+      args:
+        chdir: /home/anonymize/repo
+      ansible.builtin.shell: |
+        export PATH=/home/anonymize/.local/bin:$PATH
+        poetry config --local virtualenvs.options.no-setuptools false
+        poetry config --local virtualenvs.options.no-pip true
+        poetry install --no-interaction
+
     - name: Delete .git
       become: yes
       become_user: anonymize
@@ -69,17 +80,6 @@
       ansible.builtin.file:
         path: /home/anonymize/repo/README.md
         state: absent
-
-    - name: Install dependencies
-      become: yes
-      become_user: anonymize
-      args:
-        chdir: /home/anonymize/repo
-      ansible.builtin.shell: |
-        export PATH=/home/anonymize/.local/bin:$PATH
-        poetry config --local virtualenvs.options.no-setuptools false
-        poetry config --local virtualenvs.options.no-pip true
-        poetry install --no-interaction
 
     - name: Print K level
       debug:
