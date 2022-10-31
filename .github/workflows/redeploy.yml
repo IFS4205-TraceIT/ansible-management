@@ -30,13 +30,16 @@ jobs:
         id: secrets
         shell: bash
         run: |
-          echo 'VAULT_TOKEN=${{ secrets.VAULT_TOKEN_PROD }}' >> $GITHUB_OUTPUT
+          VAULT_CACERT=$(cat /traceit-ca.crt | base64 -w0)
+          VAULT_CLIENTCERT=$(cat /server.crt | base64 -w0)
+          VAULT_CLIENTKEY=$(cat /server.key | base64 -w0)
           
           # Redact Vault keys and certs
           echo "::add-mask::$VAULT_CACERT"
           echo "::add-mask::$VAULT_CLIENTCERT"
           echo "::add-mask::$VAULT_CLIENTKEY"
 
+          echo 'VAULT_TOKEN=${{ secrets.VAULT_TOKEN_PROD }}' >> $GITHUB_OUTPUT
           echo "VAULT_CACERT=$VAULT_CACERT" >> $GITHUB_OUTPUT
           echo "VAULT_CLIENTCERT=$VAULT_CLIENTCERT" >> $GITHUB_OUTPUT
           echo "VAULT_CLIENTKEY=$VAULT_CLIENTKEY" >> $GITHUB_OUTPUT
